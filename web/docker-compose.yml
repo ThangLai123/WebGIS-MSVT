@@ -1,0 +1,33 @@
+services:
+  frontend:
+    build: ./frontend
+    container_name: webgis_frontend
+    working_dir: /app
+    ports:
+      - "8080:80"
+    environment:
+      - VITE_API_URL=
+    restart: unless-stopped
+
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: webgis_postgis
+    environment:
+      - POSTGRES_DB=webgis_msvt
+      - POSTGRES_USER=webgis_admin
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - webgis_postgis_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U webgis_admin -d webgis_msvt"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  webgis_postgis_data:

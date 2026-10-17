@@ -1,0 +1,71 @@
+services:
+  # 1. Cơ sở dữ liệu không gian PostgreSQL 16 + PostGIS 3.4
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: webgis_postgis_prod
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-webgis_msvt}
+      - POSTGRES_USER=${POSTGRES_USER:-webgis_admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # Cổng nội bộ container, KHÔNG mở public ra ngoài Internet (Bảo mật máy chủ VPS)
+    expose:
+      - "5432"
+    volumes:
+      - webgis_postgis_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-webgis_admin} -d ${POSTGRES_DB:-webgis_msvt}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - webgis_net
+
+  # 2. Máy chủ API FastAPI Backend
+  backend-fastapi:
+    build:
+      context: ./backend-fastapi
+      dockerfile: Dockerfile
+    container_name: webgis_backend_prod
+    environment:
+      - POSTGRES_HOST=postgis
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-webgis_msvt}
+      - POSTGRES_USER=${POSTGRES_USER:-webgis_admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8000
+      - ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY}
+      - CORS_ORIGINS=["http://localhost:8080","http://localhost:80"]
+    expose:
+      - "8000"
+    depends_on:
+      postgis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - webgis_net
+
+  # 3. Giao diện người dùng Frontend React (Nginx Multi-stage)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: webgis_frontend_prod
+    ports:
+      - "80:80"
+    depends_on:
+      - backend-fastapi
+    restart: unless-stopped
+    networks:
+      - webgis_net
+
+volumes:
+  webgis_postgis_data:
+
+networks:
+  webgis_net:
+    driver: bridge

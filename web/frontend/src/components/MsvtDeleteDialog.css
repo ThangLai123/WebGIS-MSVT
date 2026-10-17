@@ -1,0 +1,160 @@
+/* MsvtDeleteDialog.css - Hộp thoại xác nhận xóa mềm MSVT */
+
+.msvt-delete-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  padding: 16px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.msvt-delete-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid #fee2e2;
+  display: flex;
+  flex-direction: column;
+}
+
+.msvt-delete-header {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.msvt-delete-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.msvt-delete-close-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.85;
+}
+
+.msvt-delete-close-btn:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.msvt-delete-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.msvt-delete-info-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.msvt-delete-info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.msvt-delete-info-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.msvt-delete-info-value {
+  color: #0f172a;
+  font-weight: 600;
+  text-align: right;
+  word-break: break-all;
+}
+
+.msvt-delete-warning-box {
+  background-color: #fef2f2;
+  border-left: 4px solid #ef4444;
+  padding: 12px;
+  border-radius: 0 8px 8px 0;
+  font-size: 12.5px;
+  color: #991b1b;
+  line-height: 1.5;
+}
+
+.msvt-delete-footer {
+  padding: 16px 20px;
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.msvt-delete-btn-cancel {
+  padding: 9px 16px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #334155;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.msvt-delete-btn-cancel:hover:not(:disabled) {
+  background-color: #f1f5f9;
+}
+
+.msvt-delete-btn-confirm {
+  padding: 9px 18px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msvt-delete-btn-confirm:hover:not(:disabled) {
+  opacity: 0.95;
+  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3);
+}
+
+.msvt-delete-btn-confirm:disabled,
+.msvt-delete-btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

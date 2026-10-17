@@ -1,0 +1,11 @@
+{
+  "venvPath": "backend-fastapi",
+  "venv": ".venv",
+  "extraPaths": [
+    "backend-fastapi"
+  ],
+  "include": [
+    "backend-fastapi/app"
+  ],
+  "reportMissingModuleSource": false
+}

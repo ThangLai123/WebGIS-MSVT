@@ -1,0 +1,232 @@
+/* Navbar.css - Thiết kế thanh điều hướng chuẩn WebGIS Quản lý Mã số Vùng trồng (MSVT) */
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border-bottom: 1.5px solid #e2e8f0;
+  padding: 0 16px;
+  height: 48px;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  font-size: 13px;
+  z-index: 1000;
+  position: relative;
+}
+
+/* Khối bên trái: Logo + Tên hệ thống */
+.navbar-brand-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.navbar-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 15px;
+  color: #15803d;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.navbar-brand-badge {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+/* Khối trung tâm: Các nút chức năng WebGIS MSVT */
+.navbar-nav-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  color: #334155;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.navbar-nav-btn:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Nút Bản đồ */
+.navbar-nav-btn-map {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.navbar-nav-btn-map:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* Nút Bật/Tắt Lớp Vùng trồng MSVT */
+.navbar-nav-btn-msvt {
+  background-color: #15803d;
+  color: #ffffff;
+  border-color: #166534;
+}
+
+.navbar-nav-btn-msvt:hover {
+  background-color: #166534;
+}
+
+.navbar-nav-btn-msvt.inactive {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border-color: #cbd5e1;
+}
+
+.navbar-nav-btn-msvt.inactive:hover {
+  background-color: #e2e8f0;
+  color: #1e293b;
+}
+
+/* Nút Tra cứu & Bộ lọc */
+.navbar-nav-btn-lookup.active {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border-color: #86efac;
+}
+
+/* Nút Thống kê */
+.navbar-nav-btn-stats {
+  background-color: #ffffff;
+}
+
+.navbar-nav-btn-stats:hover {
+  background-color: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+/* Nút Quản lý MSVT (Chỉ dành cho Admin) */
+.navbar-nav-btn-admin {
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.3);
+}
+
+.navbar-nav-btn-admin:hover {
+  background: linear-gradient(135deg, #166534 0%, #14532d 100%);
+  box-shadow: 0 2px 5px rgba(21, 128, 61, 0.4);
+}
+
+/* Khối bên phải: Tài khoản & Đăng nhập / Đăng xuất */
+.navbar-user-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.navbar-role-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.navbar-role-pill.admin {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.navbar-role-pill.viewer {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.navbar-btn-logout {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #64748b;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.navbar-btn-logout:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.navbar-btn-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #15803d;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.navbar-btn-login:hover {
+  background-color: #dcfce7;
+  border-color: #4ade80;
+}
+
+/* Responsive cho màn hình laptop / desktop nhỏ */
+@media (max-width: 1080px) {
+  .navbar-container {
+    padding: 0 10px;
+  }
+  .navbar-nav-section {
+    gap: 6px;
+  }
+  .navbar-nav-btn {
+    padding: 5px 9px;
+    font-size: 12px;
+  }
+}

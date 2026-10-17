@@ -1,0 +1,279 @@
+/* MsvtSidebar.css - Giao diện Bảng điều khiển & Tra cứu Vùng trồng MSVT */
+
+.msvt-panel-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #ffffff;
+  color: #1f2937;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+}
+
+.msvt-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+  color: white;
+  border-bottom: 1px solid #14532d;
+}
+
+.msvt-panel-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.msvt-close-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.8;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.msvt-close-btn:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Tabs Navigation */
+.msvt-tabs {
+  display: flex;
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.msvt-tab-btn {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #4b5563;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.msvt-tab-btn:hover {
+  color: #15803d;
+  background-color: #e5e7eb;
+}
+
+.msvt-tab-btn.active {
+  color: #15803d;
+  border-bottom: 2px solid #15803d;
+  background-color: #ffffff;
+}
+
+/* Panel Body */
+.msvt-panel-body {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Detail Card & Badges */
+.msvt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.msvt-badge-poly {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.msvt-badge-point {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.msvt-detail-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  word-break: break-word;
+}
+
+.msvt-meta-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.msvt-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.msvt-meta-label {
+  font-weight: 600;
+  color: #6b7280;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.msvt-meta-value {
+  color: #111827;
+  font-size: 13.5px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* Alerts and Disclaimers */
+.msvt-alert {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.msvt-alert-warning {
+  background-color: #fefce8;
+  border: 1px solid #fde047;
+  color: #854d0e;
+}
+
+.msvt-alert-info {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.msvt-alert-danger {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+/* Lookup Form */
+.msvt-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.msvt-form-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.msvt-form-input {
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.msvt-form-input:focus {
+  border-color: #15803d;
+  box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.2);
+}
+
+.msvt-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.msvt-action-btn-primary {
+  background-color: #15803d;
+  color: white;
+}
+
+.msvt-action-btn-primary:hover:not(:disabled) {
+  background-color: #166534;
+}
+
+.msvt-action-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.msvt-action-btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.msvt-action-btn-secondary:hover {
+  background-color: #e5e7eb;
+}
+
+/* Results Card */
+.msvt-result-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.2s, background-color 0.2s;
+  cursor: pointer;
+}
+
+.msvt-result-item:hover {
+  border-color: #15803d;
+  background-color: #f0fdf4;
+}
+
+/* Empty State */
+.msvt-empty-state {
+  text-align: center;
+  padding: 24px 16px;
+  color: #6b7280;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}

@@ -1,0 +1,735 @@
+/* ==============================================================================
+   MsvtImportModal.css - Giao diện Wizard 6 bước Nhập nhanh MSVT từ Excel
+   Thiết kế chuẩn WebGIS cao cấp: Dark/Light tương phản, Glassmorphism, Micro-animations
+   ============================================================================== */
+
+.msvt-import-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: msvtFadeIn 0.25s ease-out;
+}
+
+.msvt-import-modal {
+  background: #ffffff;
+  width: 100%;
+  max-width: 1200px;
+  height: 90vh;
+  max-height: 860px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(226, 232, 240, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Header */
+.msvt-import-header {
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.msvt-import-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.msvt-import-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.msvt-import-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.msvt-import-subtitle {
+  margin: 2px 0 0 0;
+  font-size: 12.5px;
+  color: #bfdbfe;
+}
+
+.msvt-import-close-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.msvt-import-close-btn:hover {
+  background: rgba(239, 68, 68, 0.9);
+  transform: rotate(90deg);
+}
+
+/* Stepper Progress Bar */
+.msvt-stepper {
+  display: flex;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px 24px;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.msvt-step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.msvt-step-item.active {
+  background: #dbeafe;
+  color: #1d4ed8;
+  box-shadow: 0 1px 3px rgba(29, 78, 216, 0.15);
+}
+
+.msvt-step-item.completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.msvt-step-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  background: currentColor;
+  color: #ffffff;
+}
+
+.msvt-step-item.active .msvt-step-badge {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.msvt-step-item.completed .msvt-step-badge {
+  background: #15803d;
+  color: #ffffff;
+}
+
+/* Modal Body */
+.msvt-import-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: #f8fafc;
+}
+
+/* Step 1: Upload Zone */
+.msvt-upload-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.msvt-dropzone {
+  border: 2px dashed #93c5fd;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.msvt-dropzone:hover,
+.msvt-dropzone.dragover {
+  border-color: #2563eb;
+  background: #eff6ff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.1);
+}
+
+.msvt-dropzone-icon {
+  font-size: 48px;
+  color: #3b82f6;
+  margin-bottom: 4px;
+}
+
+.msvt-dropzone-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.msvt-dropzone-desc {
+  font-size: 13.5px;
+  color: #64748b;
+  max-width: 480px;
+}
+
+.msvt-dropzone-btn {
+  margin-top: 8px;
+  padding: 10px 20px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  transition: all 0.2s;
+}
+
+.msvt-dropzone-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.msvt-upload-guidelines {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.msvt-guide-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msvt-guide-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+/* Step 2: Mapping */
+.msvt-mapping-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.msvt-mapping-config-bar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  align-items: flex-end;
+}
+
+.msvt-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.msvt-form-group label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.msvt-form-group select,
+.msvt-form-group input {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13.5px;
+  background: #ffffff;
+  color: #1e293b;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.msvt-form-group select:focus,
+.msvt-form-group input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.msvt-mapping-table-wrap {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.msvt-mapping-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.msvt-mapping-table th {
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 700;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.msvt-mapping-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.msvt-mapping-table tr:hover {
+  background: #f8fafc;
+}
+
+.msvt-field-tag {
+  display: inline-block;
+  font-family: monospace;
+  font-size: 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+/* Step 3: Loading / Dry run animation */
+.msvt-loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+  text-align: center;
+}
+
+.msvt-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: msvtSpin 0.8s linear infinite;
+}
+
+/* Step 4: Preview Dashboard */
+.msvt-preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.msvt-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.msvt-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.msvt-kpi-card.green { border-left: 4px solid #16a34a; }
+.msvt-kpi-card.amber { border-left: 4px solid #d97706; }
+.msvt-kpi-card.blue  { border-left: 4px solid #2563eb; }
+.msvt-kpi-card.red   { border-left: 4px solid #dc2626; }
+.msvt-kpi-card.indigo { border-left: 4px solid #4f46e5; }
+
+.msvt-kpi-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.msvt-kpi-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 4px 0 2px 0;
+}
+
+.msvt-kpi-sub {
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+
+/* Filter Bar */
+.msvt-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #ffffff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.msvt-filter-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.msvt-filter-btn {
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.msvt-filter-btn.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.msvt-filter-btn.green.active { background: #16a34a; border-color: #16a34a; }
+.msvt-filter-btn.amber.active { background: #d97706; border-color: #d97706; }
+.msvt-filter-btn.blue.active  { background: #2563eb; border-color: #2563eb; }
+.msvt-filter-btn.red.active   { background: #dc2626; border-color: #dc2626; }
+
+.msvt-search-input {
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 20px;
+  font-size: 13px;
+  width: 220px;
+  outline: none;
+}
+
+.msvt-search-input:focus {
+  border-color: #2563eb;
+}
+
+/* Table preview */
+.msvt-preview-table-wrap {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow-x: auto;
+  max-height: 420px;
+}
+
+.msvt-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.msvt-preview-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 700;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.msvt-preview-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  color: #1e293b;
+}
+
+.msvt-preview-table tr.selected {
+  background: #f8fafc;
+}
+
+.msvt-preview-table tr:hover {
+  background: #eff6ff;
+}
+
+/* Badges */
+.msvt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.msvt-badge.valid { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+.msvt-badge.warning { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+.msvt-badge.duplicate { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+.msvt-badge.invalid { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+.msvt-btn-map-preview {
+  padding: 4px 8px;
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.msvt-btn-map-preview:hover {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+/* Step 5: Confirmation */
+.msvt-commit-summary-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.msvt-commit-stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+}
+
+.msvt-commit-stat-row strong {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.msvt-security-box {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #166534;
+  line-height: 1.5;
+}
+
+/* Step 6: Success / Report */
+.msvt-result-box {
+  max-width: 680px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 36px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.msvt-result-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.msvt-result-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+}
+
+.msvt-result-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Modal Footer */
+.msvt-import-footer {
+  padding: 14px 24px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.msvt-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msvt-btn-secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.msvt-btn-secondary:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.msvt-btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+}
+
+.msvt-btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.msvt-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.msvt-btn-success {
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 2px 4px rgba(22, 163, 74, 0.25);
+}
+
+.msvt-btn-success:hover:not(:disabled) {
+  background: #15803d;
+  transform: translateY(-1px);
+}
+
+/* Map Preview Drawer */
+.msvt-map-drawer-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.msvt-map-drawer {
+  background: #ffffff;
+  width: 100%;
+  max-width: 800px;
+  height: 520px;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.msvt-map-drawer-header {
+  padding: 12px 18px;
+  background: #1e293b;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.msvt-map-drawer-content {
+  flex: 1;
+  position: relative;
+}
+
+@keyframes msvtFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes msvtSpin {
+  to { transform: rotate(360deg); }
+}

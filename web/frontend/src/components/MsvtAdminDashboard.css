@@ -1,0 +1,279 @@
+/* MsvtAdminDashboard.css - Giao diện Dashboard Quản trị MSVT */
+
+.msvt-dashboard-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9500;
+  padding: 16px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.msvt-dashboard-container {
+  background-color: #f8fafc;
+  border-radius: 14px;
+  width: 96vw;
+  max-width: 1400px;
+  height: 92vh;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+}
+
+/* Header */
+.msvt-dashboard-header {
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #14532d;
+  flex-shrink: 0;
+}
+
+.msvt-dashboard-title-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.msvt-dashboard-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.msvt-dashboard-badge {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #f0fdf4;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.msvt-dashboard-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.msvt-dash-btn-add {
+  background-color: #22c55e;
+  color: #0f172a;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.msvt-dash-btn-add:hover {
+  background-color: #4ade80;
+  transform: translateY(-1px);
+}
+
+.msvt-dash-btn-refresh {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.msvt-dash-btn-refresh:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.msvt-dash-btn-close {
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  opacity: 0.85;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.msvt-dash-btn-close:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Stats Cards */
+.msvt-dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  padding: 16px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.msvt-stat-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.msvt-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+}
+
+.msvt-stat-card.green::before { background-color: #15803d; }
+.msvt-stat-card.blue::before { background-color: #0284c7; }
+.msvt-stat-card.amber::before { background-color: #d97706; }
+.msvt-stat-card.purple::before { background-color: #7c3aed; }
+
+.msvt-stat-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.msvt-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.msvt-stat-sub {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+/* Filter Toolbar */
+.msvt-dashboard-toolbar {
+  padding: 12px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.msvt-toolbar-input {
+  padding: 7px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  min-width: 180px;
+  background-color: #f8fafc;
+}
+
+.msvt-toolbar-input:focus {
+  border-color: #15803d;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.15);
+}
+
+.msvt-toolbar-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+  margin-left: auto;
+}
+
+.msvt-toolbar-btn-reset {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  color: #475569;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.msvt-toolbar-btn-reset:hover {
+  background-color: #e2e8f0;
+}
+
+/* Content Area */
+.msvt-dashboard-content {
+  flex: 1;
+  padding: 16px 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Detail Modal */
+.msvt-detail-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+  padding: 16px;
+}
+
+.msvt-detail-modal-card {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 650px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 900px) {
+  .msvt-dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

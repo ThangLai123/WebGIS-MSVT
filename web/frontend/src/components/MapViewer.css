@@ -1,0 +1,429 @@
+/* MapViewer.css - Định dạng Bản đồ Leaflet WebGIS MSVT */
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Nút điều khiển Bản đồ nhanh (Toàn cảnh MSVT) */
+.map-quick-controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-control-btn {
+  background-color: #ffffff;
+  color: #15803d;
+  border: 1.5px solid #86efac;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.map-control-btn:hover {
+  background-color: #f0fdf4;
+  border-color: #22c55e;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+}
+
+/* Chú giải Bản đồ (Map Legend) */
+.map-legend-box {
+  position: absolute;
+  bottom: 24px;
+  right: 20px;
+  z-index: 900;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 210px;
+  color: #1e293b;
+}
+
+.map-legend-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #334155;
+}
+
+.map-legend-symbol-poly {
+  width: 16px;
+  height: 12px;
+  background-color: rgba(34, 197, 94, 0.4);
+  border: 2px solid #15803d;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.map-legend-symbol-point {
+  width: 12px;
+  height: 12px;
+  background-color: #3b82f6;
+  border: 2px solid #1d4ed8;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.map-legend-symbol-none {
+  width: 12px;
+  height: 12px;
+  background-color: #e2e8f0;
+  border: 1.5px dashed #94a3b8;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.map-legend-note {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+  font-style: italic;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 4px;
+}
+
+/* Thanh Tọa độ Click Góc Dưới Trái */
+.map-coord-bar {
+  position: absolute;
+  bottom: 24px;
+  left: 20px;
+  z-index: 900;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #0f172a;
+}
+
+.map-coord-btn-lookup {
+  background-color: #15803d;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.map-coord-btn-lookup:hover {
+  background-color: #166534;
+}
+
+/* ========================================================
+   ONE MARKER PER MSVT: MARKER XANH LÁ ĐỒNG NHẤT
+   ======================================================== */
+.msvt-unified-marker {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+}
+
+.msvt-marker-dot {
+  width: 14px;
+  height: 14px;
+  background-color: #16a34a; /* Xanh lá tươi sáng */
+  border: 2px solid #ffffff; /* Viền trắng mảnh */
+  border-radius: 50%;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.18s ease,
+              box-shadow 0.18s ease;
+}
+
+/* Hover: Đổi màu cam, tăng kích thước nhẹ */
+.msvt-unified-marker:hover .msvt-marker-dot,
+.msvt-unified-marker.hovered .msvt-marker-dot {
+  background-color: #ea580c; /* Cam rực rỡ */
+  transform: scale(1.28);
+  box-shadow: 0 3px 8px rgba(234, 88, 12, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.9);
+  z-index: 999;
+}
+
+/* Selected: Vòng highlight rõ ràng */
+.msvt-unified-marker.selected .msvt-marker-dot {
+  background-color: #ea580c;
+  transform: scale(1.35);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.45), 0 3px 10px rgba(0, 0, 0, 0.4);
+  animation: msvtMarkerHalo 1.8s infinite;
+  z-index: 1000;
+}
+
+@keyframes msvtMarkerHalo {
+  0% {
+    box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.6), 0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(234, 88, 12, 0.15), 0 2px 8px rgba(0, 0, 0, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.6), 0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+}
+
+/* ========================================================
+   MODERN TOOLTIP / INFO CARD HOVER (260 - 320PX)
+   ======================================================== */
+.leaflet-tooltip.msvt-modern-tooltip {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  padding: 0 !important;
+  color: #1e293b !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  width: 290px !important;
+  max-width: 320px !important;
+  pointer-events: none;
+  white-space: normal !important;
+}
+
+.leaflet-tooltip.msvt-modern-tooltip:before {
+  border-top-color: #cbd5e1 !important;
+}
+
+.msvt-tooltip-card {
+  padding: 11px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.msvt-tooltip-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1.5px solid #f1f5f9;
+  padding-bottom: 6px;
+}
+
+.msvt-tooltip-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #15803d;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.msvt-tooltip-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.msvt-tooltip-badge.poly {
+  background-color: #dcfce7;
+  color: #15803d;
+  border-color: #86efac;
+}
+
+.msvt-tooltip-badge.point {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+.msvt-tooltip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11.5px;
+  line-height: 1.42;
+  color: #334155;
+}
+
+.msvt-tooltip-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.msvt-tooltip-label {
+  color: #64748b;
+  font-weight: 500;
+  flex-shrink: 0;
+  min-width: 90px;
+}
+
+.msvt-tooltip-val {
+  color: #0f172a;
+  font-weight: 600;
+  word-break: break-word;
+  flex: 1;
+}
+
+.msvt-tooltip-hint {
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 5px;
+  font-size: 10.5px;
+  color: #64748b;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* ========================================================
+   CHÚ GIẢI BẢN ĐỒ TỐI GIẢN (MINIMALIST LEGEND)
+   ======================================================== */
+.map-legend-collapsible {
+  position: absolute;
+  bottom: 24px;
+  right: 20px;
+  z-index: 900;
+  background-color: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(8px);
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+  color: #1e293b;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  min-width: 250px;
+}
+
+.map-legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: linear-gradient(to right, #f8fafc, #f1f5f9);
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.map-legend-header:hover {
+  background: #f1f5f9;
+}
+
+.map-legend-header-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 12px;
+  color: #0f172a;
+  letter-spacing: 0.01em;
+}
+
+.map-legend-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.map-legend-body {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #334155;
+}
+
+.map-legend-dot-green {
+  width: 14px;
+  height: 14px;
+  background-color: #16a34a;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.map-legend-dot-orange {
+  width: 14px;
+  height: 14px;
+  background-color: #ea580c;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.35);
+  flex-shrink: 0;
+}
+
+.map-legend-poly-selected {
+  width: 18px;
+  height: 14px;
+  background-color: rgba(34, 197, 94, 0.25);
+  border: 2px solid #15803d;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.map-legend-note {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 3px;
+  font-style: italic;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 6px;
+  line-height: 1.4;
+}

@@ -1,0 +1,16 @@
+project-includes = [
+    "backend-fastapi/app/**/*.py*",
+    "backend-fastapi/create_admin.py",
+    "backend-fastapi/run.py",
+    "backend-fastapi/tests/**/*.py*",
+    "database/**/*.py*",
+]
+
+project-excludes = [
+    "**/backup*/**",
+    "**/node_modules/**",
+    "**/.venv/**",
+]
+
+python-interpreter-path = "backend-fastapi/.venv/Scripts/python.exe"
+search-path = ["backend-fastapi"]

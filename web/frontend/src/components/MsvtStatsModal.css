@@ -1,0 +1,224 @@
+/* MsvtStatsModal.css - Modal Thống kê tổng hợp WebGIS MSVT */
+
+.msvt-stats-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.msvt-stats-modal {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 760px;
+  max-height: 90vh;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  display: flex;
+  flex-direction: column;
+}
+
+.msvt-stats-header {
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+  color: white;
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #14532d;
+}
+
+.msvt-stats-header h3 {
+  margin: 0;
+  font-size: 17.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.msvt-stats-close-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.85;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.msvt-stats-close-btn:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.msvt-stats-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 4 Thẻ số liệu chính */
+.msvt-stats-cards-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.msvt-stats-mini-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 3px solid #15803d;
+}
+
+.msvt-stats-mini-card.blue { border-top-color: #0284c7; }
+.msvt-stats-mini-card.amber { border-top-color: #d97706; }
+.msvt-stats-mini-card.purple { border-top-color: #7c3aed; }
+
+.msvt-stats-card-label {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.msvt-stats-card-val {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.msvt-stats-card-sub {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Biểu đồ / Bảng cây trồng & Thị trường */
+.msvt-stats-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.msvt-stats-section-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msvt-stats-box-title {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 8px;
+}
+
+.msvt-stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.msvt-stats-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background-color: #f8fafc;
+}
+
+.msvt-stats-item:hover {
+  background-color: #f0fdf4;
+}
+
+.msvt-stats-item-name {
+  color: #334155;
+  font-weight: 500;
+}
+
+.msvt-stats-item-count {
+  font-weight: 700;
+  color: #15803d;
+  background-color: #dcfce7;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.msvt-stats-note-box {
+  background-color: #f0fdf4;
+  border-left: 4px solid #15803d;
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+  font-size: 12px;
+  color: #166534;
+  line-height: 1.5;
+}
+
+.msvt-stats-footer {
+  padding: 12px 22px;
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.msvt-stats-btn-close {
+  padding: 7px 18px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.msvt-stats-btn-close:hover {
+  background-color: #f1f5f9;
+}
+
+@media (max-width: 680px) {
+  .msvt-stats-cards-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .msvt-stats-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}

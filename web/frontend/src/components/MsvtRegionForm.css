@@ -1,0 +1,1689 @@
+/* MsvtRegionForm.css - Modal Form Thêm và Sửa vùng trồng MSVT với Bản đồ Khoanh vùng Live */
+
+.msvt-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+  animation: msvtFadeIn 0.15s ease-out;
+}
+
+@keyframes msvtFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.msvt-form-modal {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 860px;
+  max-height: 92vh;
+  box-shadow: 0 25px 35px -5px rgba(0, 0, 0, 0.28), 0 10px 15px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  display: flex;
+  flex-direction: column;
+}
+
+.msvt-form-modal-large {
+  max-width: 980px;
+}
+
+.msvt-form-header {
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #14532d;
+}
+
+.msvt-form-header-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.msvt-form-close-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  opacity: 0.85;
+  transition: all 0.15s ease;
+}
+
+.msvt-form-close-btn:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.msvt-form-alert {
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid transparent;
+}
+
+.msvt-form-alert-error {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.msvt-form-alert-success {
+  background-color: #f0fdf4;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.msvt-form-alert-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-weight: 700;
+}
+
+.msvt-form-body {
+  padding: 18px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.msvt-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  background-color: #fafbfc;
+}
+
+.msvt-form-section-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.msvt-form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.msvt-form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+.msvt-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.msvt-field-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.msvt-field-input,
+.msvt-field-textarea {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #0f172a;
+  outline: none;
+  background-color: #ffffff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.msvt-field-input:focus,
+.msvt-field-textarea:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+.msvt-field-hint {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* ==============================================================================
+   KHỐI TỌA ĐỘ & KHOANH VÙNG GIS
+   ============================================================================== */
+.msvt-geom-section {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.msvt-geom-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.msvt-geom-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background-color: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.msvt-geom-mode-selector {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.msvt-geom-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.msvt-geom-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #1e293b;
+}
+
+.msvt-geom-radio-label input[type="radio"] {
+  accent-color: #16a34a;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.msvt-geom-editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.msvt-geom-tabs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 6px;
+}
+
+.msvt-geom-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.msvt-geom-tab-btn {
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.15s;
+}
+
+.msvt-geom-tab-btn:hover {
+  background: #e2e8f0;
+}
+
+.msvt-geom-tab-btn.active {
+  background: #15803d;
+  color: #ffffff;
+  border-color: #15803d;
+}
+
+.msvt-geom-quick-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msvt-btn-tool {
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.msvt-btn-tool:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.msvt-btn-tool-danger {
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.msvt-btn-tool-danger:hover {
+  background-color: #fef2f2;
+  border-color: #ef4444;
+}
+
+/* Ô Textarea nhập danh sách */
+.msvt-coord-textarea {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+/* Bảng danh sách đỉnh */
+.msvt-geom-table-container {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.msvt-empty-vertices {
+  padding: 18px;
+  text-align: center;
+  font-size: 12.5px;
+  color: #64748b;
+  font-style: italic;
+}
+
+.msvt-vertices-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.msvt-vertices-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.msvt-vertices-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.msvt-vertex-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffedd5;
+  color: #c2410c;
+  border: 1px solid #fdba74;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.msvt-vertex-input {
+  width: 95%;
+  padding: 5px 8px;
+  font-size: 12.5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.msvt-vertex-input:focus {
+  border-color: #ea580c;
+  outline: none;
+}
+
+.msvt-vertex-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.msvt-btn-reorder,
+.msvt-btn-del-vertex {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.msvt-btn-reorder:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.msvt-btn-del-vertex:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+}
+
+.msvt-btn-reorder:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Banner Thông báo Kiểm định */
+.msvt-geom-status-banner {
+  padding: 9px 14px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  border: 1px solid transparent;
+}
+
+.msvt-geom-status-banner.info {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.msvt-geom-status-banner.warning {
+  background-color: #fefce8;
+  color: #a16207;
+  border-color: #fef08a;
+}
+
+.msvt-geom-status-banner.success {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.msvt-geom-status-banner.error {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+/* Khối Bản đồ Live Preview */
+.msvt-preview-map-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: #f8fafc;
+}
+
+.msvt-preview-map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.msvt-map-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.msvt-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.msvt-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.msvt-leaflet-container-wrapper {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.15);
+}
+
+.msvt-map-footer-hint {
+  font-size: 11px;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Hộp thoại xác nhận ranh giới */
+.msvt-boundary-confirm-box {
+  background-color: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.msvt-boundary-confirm-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #166534;
+}
+
+.msvt-boundary-confirm-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #16a34a;
+  cursor: pointer;
+}
+
+/* Chế độ nhập định dạng tọa độ */
+.msvt-format-mode-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f1f5f9;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+.msvt-format-mode-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.msvt-format-mode-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.msvt-format-mode-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.15s;
+}
+
+.msvt-format-mode-btn:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.msvt-format-mode-btn.active {
+  background-color: #15803d;
+  color: #ffffff;
+  border-color: #15803d;
+}
+
+/* Thẻ định dạng nhận diện */
+.msvt-detected-format-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+/* Dashboard Thống kê tọa độ */
+.msvt-stats-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  background-color: #f8fafc;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.msvt-stat-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.msvt-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.msvt-stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 2px;
+}
+
+.msvt-stat-card.valid .msvt-stat-value {
+  color: #16a34a;
+}
+
+.msvt-stat-card.warning .msvt-stat-value {
+  color: #d97706;
+}
+
+.msvt-stat-card.error .msvt-stat-value {
+  color: #dc2626;
+}
+
+.msvt-stat-card.type .msvt-stat-value {
+  font-size: 13px;
+  color: #2563eb;
+}
+
+/* Danh sách chi tiết lỗi hoặc trùng lặp */
+.msvt-issues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background-color: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #9f1239;
+}
+
+.msvt-issue-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Thanh nút hành động nhanh */
+.msvt-action-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  background-color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.msvt-action-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #334155;
+}
+
+.msvt-action-btn:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.msvt-action-btn-primary {
+  background-color: #15803d;
+  color: #ffffff;
+  border-color: #15803d;
+}
+
+.msvt-action-btn-primary:hover {
+  background-color: #166534;
+  border-color: #166534;
+  color: #ffffff;
+}
+
+.msvt-action-btn-simulation {
+  background-color: #fffbeb;
+  color: #b45309;
+  border-color: #fcd34d;
+}
+
+.msvt-action-btn-simulation.active {
+  background-color: #f59e0b;
+  color: #ffffff;
+  border-color: #d97706;
+}
+
+.msvt-action-btn-simulation:hover {
+  background-color: #fef3c7;
+}
+
+/* Modal xem tọa độ gốc */
+.msvt-raw-coords-modal {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msvt-raw-coords-table {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+/* KHỐI XỬ LÝ & MÔ PHỎNG 2 ĐIỂM GPS */
+.msvt-2points-card {
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msvt-2points-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #92400e;
+  font-size: 13px;
+}
+
+.msvt-2points-dist-badge {
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.msvt-2points-notice {
+  font-size: 12px;
+  color: #92400e;
+  line-height: 1.4;
+}
+
+.msvt-2points-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background-color: #ffffff;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #fef08a;
+}
+
+.msvt-2points-mode-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #1e293b;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background-color 0.15s;
+}
+
+.msvt-2points-mode-item:hover {
+  background-color: #fefce8;
+}
+
+.msvt-2points-mode-item.active {
+  font-weight: 600;
+  color: #b45309;
+}
+
+.msvt-2points-mode-item input[type="radio"] {
+  accent-color: #d97706;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.msvt-2points-buffer-params {
+  background-color: #ffffff;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.msvt-quick-dist-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.msvt-btn-tool.active {
+  background-color: #d97706;
+  color: #ffffff;
+  border-color: #b45309;
+}
+
+.msvt-2points-bbox-params {
+  background-color: #ffffff;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.msvt-bbox-confirm-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #92400e;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.msvt-bbox-confirm-label input[type="checkbox"] {
+  accent-color: #d97706;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.msvt-2points-guide {
+  font-size: 11.5px;
+  color: #78350f;
+  font-style: italic;
+}
+
+
+/* Footer buttons */
+.msvt-form-footer {
+  padding: 14px 24px;
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.msvt-btn-cancel {
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  background-color: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.msvt-btn-cancel:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.msvt-btn-submit {
+  padding: 9px 22px;
+  font-size: 13.5px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(22, 163, 74, 0.3);
+  transition: all 0.15s;
+}
+
+.msvt-btn-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+  box-shadow: 0 4px 8px rgba(22, 163, 74, 0.4);
+}
+
+.msvt-btn-submit:disabled,
+.msvt-btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .msvt-form-grid-2,
+  .msvt-form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   CSS CHO TÍNH NĂNG ĐỐI CHIẾU DIỆN TÍCH VÀ ĐỀ XUẤT HÌNH MÔ PHỎNG (MSVT #38)
+   ========================================================================== */
+
+/* 1. Thẻ đối chiếu diện tích */
+.msvt-area-comparison-card {
+  background: linear-gradient(to bottom right, #f8fafc, #f1f5f9);
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-top: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.msvt-area-comparison-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 6px;
+}
+
+.msvt-area-card-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.2px;
+}
+
+.msvt-area-eval-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.msvt-area-eval-badge.close {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.msvt-area-eval-badge.review {
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.msvt-area-eval-badge.warning {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.msvt-area-eval-badge.no_declared {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.msvt-area-eval-badge.invalid {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #f87171;
+}
+
+.msvt-area-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.msvt-area-stat {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.msvt-area-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.msvt-area-stat-val {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 2px;
+}
+
+.msvt-area-stat-val.highlight {
+  color: #0284c7;
+}
+
+.msvt-area-stat-val.close {
+  color: #16a34a;
+}
+
+.msvt-area-stat-val.review {
+  color: #d97706;
+}
+
+.msvt-area-stat-val.warning {
+  color: #dc2626;
+}
+
+/* Cảnh báo phân tích Convex Hull */
+.msvt-hull-analysis-alert {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.msvt-hull-analysis-alert.info {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+}
+
+.msvt-hull-analysis-alert.warning {
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #b45309;
+}
+
+/* Prompt bar mở bảng đề xuất */
+.msvt-candidates-prompt-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  background-color: #fff7ed;
+  border: 1px solid #fed7aa;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #9a3412;
+}
+
+.msvt-btn-open-candidates {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(234, 88, 12, 0.3);
+  transition: all 0.15s;
+}
+
+.msvt-btn-open-candidates:hover {
+  background: linear-gradient(135deg, #c2410c 0%, #9a3412 100%);
+}
+
+/* 2. Bảng đề xuất các phương án mô phỏng */
+.msvt-candidates-panel {
+  background-color: #ffffff;
+  border: 2px solid #fdba74;
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.12);
+}
+
+.msvt-candidates-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #fed7aa;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.msvt-candidate-count-tag {
+  background-color: #ffedd5;
+  color: #c2410c;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #fed7aa;
+}
+
+.msvt-candidates-close-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.msvt-candidates-close-btn:hover {
+  color: #0f172a;
+}
+
+.msvt-candidates-disclaimer {
+  font-size: 11.5px;
+  color: #475569;
+  background-color: #f8fafc;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 10px;
+  line-height: 1.45;
+}
+
+.msvt-candidates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.msvt-candidate-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  transition: all 0.15s;
+}
+
+.msvt-candidate-card:hover {
+  border-color: #ea580c;
+  background-color: #fffaf5;
+}
+
+.msvt-candidate-card.selected {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+}
+
+.msvt-candidate-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.msvt-candidate-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.msvt-candidate-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.msvt-candidate-specs {
+  font-size: 12px;
+  color: #334155;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.msvt-btn-apply-candidate {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
+  transition: all 0.15s;
+}
+
+.msvt-btn-apply-candidate:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+.msvt-candidates-empty {
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+  padding: 10px;
+  text-align: center;
+}
+
+/* 3. Toolbar Hoàn tác và Bản nháp chỉnh sửa */
+.msvt-draft-badge {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #bfdbfe;
+}
+
+.msvt-history-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msvt-history-btn {
+  padding: 3px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.msvt-history-btn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.msvt-history-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.msvt-history-btn.restore {
+  color: #b45309;
+  border-color: #fde68a;
+  background-color: #fffbeb;
+}
+
+.msvt-history-btn.restore:hover:not(:disabled) {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+/* ========================================================================== */
+/* MULTI-GROUP COORDINATE MANAGER (SECTION V & VI & VIII)                     */
+/* ========================================================================== */
+.msvt-multigroup-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #faf5ff;
+  border: 1.5px solid #d8b4fe;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 10px;
+  box-shadow: 0 1px 3px rgba(147, 51, 234, 0.08);
+}
+
+.msvt-multigroup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.msvt-multigroup-badge {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #c084fc;
+}
+
+.msvt-multigroup-question-box {
+  background-color: #ffffff;
+  border: 1px solid #e9d5ff;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.msvt-multigroup-question-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #6b21a8;
+  margin-bottom: 4px;
+}
+
+.msvt-multigroup-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.msvt-multigroup-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background-color: #fdf4ff;
+  border: 1px solid #f0abfc;
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.msvt-multigroup-option:hover {
+  background-color: #fae8ff;
+}
+
+.msvt-multigroup-option.active {
+  background-color: #f5d0fe;
+  border-color: #c026d3;
+  box-shadow: 0 1px 3px rgba(192, 38, 211, 0.2);
+}
+
+.msvt-multigroup-option input[type="radio"] {
+  margin-top: 3px;
+}
+
+.msvt-group-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.msvt-group-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.msvt-group-tab-btn:hover {
+  background-color: #f8fafc;
+}
+
+.msvt-group-tab-btn.active {
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.msvt-group-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.msvt-tab-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.msvt-tab-badge.success {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.msvt-tab-badge.warning {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.msvt-tab-badge.danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.msvt-group-summary-table-wrapper {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow-x: auto;
+  max-height: 220px;
+}
+
+.msvt-group-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+}
+
+.msvt-group-summary-table th {
+  background-color: #f8fafc;
+  padding: 6px 10px;
+  border-bottom: 1.5px solid #cbd5e1;
+  color: #475569;
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.msvt-group-summary-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+}
+
+.msvt-group-summary-table tr.highlight-row {
+  background-color: #faf5ff;
+}
+
+.msvt-group-color-badge {
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.msvt-narrow-tag {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.msvt-multigroup-area-box {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #166534;
+}
+
+/* ==============================================================================
+   BẢNG TRẠNG THÁI KIỂM ĐỊNH HÌNH HỌC 8 TIÊU CHÍ & 4 NÚT THAO TÁC (SECTION XII)
+   ============================================================================== */
+.msvt-checklist-card {
+  margin-top: 14px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.msvt-checklist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 8px;
+}
+
+.msvt-checklist-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msvt-checklist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.msvt-checklist-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 5px;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.msvt-checklist-btn:hover:not(:disabled) {
+  background-color: #e2e8f0;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.msvt-checklist-btn.btn-primary {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.msvt-checklist-btn.btn-primary:hover:not(:disabled) {
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.msvt-checklist-btn.btn-danger {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.msvt-checklist-btn.btn-danger:hover:not(:disabled) {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.msvt-checklist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.msvt-checklist-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.msvt-checklist-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+}
+
+.msvt-checklist-table tr:hover {
+  background-color: #f8fafc;
+}
+
+.msvt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.msvt-badge-pass {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.msvt-badge-fail {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.msvt-badge-warn {
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.msvt-badge-neutral {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+/* ==============================================================================
+   VALIDATION STATUS BANNER & CHẶN NÚT LƯU (SECTION IV)
+   ============================================================================== */
+.msvt-validation-banner {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.msvt-validation-banner.banner-invalid {
+  background-color: #fef2f2;
+  border: 1.5px solid #f87171;
+  color: #991b1b;
+}
+
+.msvt-validation-banner.banner-warning {
+  background-color: #fffbeb;
+  border: 1.5px solid #fcd34d;
+  color: #92400e;
+}
+
+.msvt-validation-banner.banner-unconfirmed {
+  background-color: #fff7ed;
+  border: 1.5px solid #fb923c;
+  color: #9a3412;
+}
+
+.msvt-validation-banner.banner-confirmed {
+  background-color: #f0fdf4;
+  border: 1.5px solid #4ade80;
+  color: #166534;
+}
+
+.msvt-validation-banner.banner-empty {
+  background-color: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  color: #475569;
+}
+
+.msvt-btn-disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  filter: grayscale(40%);
+}
+
+.msvt-btn-disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+
+
+
