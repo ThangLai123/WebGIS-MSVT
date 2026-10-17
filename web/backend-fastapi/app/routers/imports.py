@@ -18,6 +18,8 @@ import json
 import uuid
 import hashlib
 import logging
+import os
+import tempfile
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from pathlib import Path
@@ -55,8 +57,18 @@ router = APIRouter(
 )
 
 # Thư mục lưu trữ tạm an toàn cho các file Excel upload
-TEMP_DIR = Path(__file__).resolve().parent.parent.parent / "temp_imports"
-TEMP_DIR.mkdir(parents=True, exist_ok=True)
+# Trên Vercel / AWS Lambda, hệ thống tệp chỉ cho phép ghi tại /tmp (hoặc tempfile.gettempdir())
+if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+    TEMP_DIR = Path(tempfile.gettempdir()) / "webgis_temp_imports"
+else:
+    TEMP_DIR = Path(__file__).resolve().parent.parent.parent / "temp_imports"
+
+try:
+    TEMP_DIR.mkdir(parents=True, exist_ok=True)
+except Exception as _e:
+    # Dự phòng an toàn nếu không có quyền ghi tại thư mục ứng dụng
+    TEMP_DIR = Path(tempfile.gettempdir()) / "webgis_temp_imports"
+    TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # Giới hạn 10 MB
 MAX_DATA_ROWS = 5000               # Giới hạn 5000 dòng

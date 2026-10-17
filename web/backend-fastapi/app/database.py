@@ -14,24 +14,49 @@ if LOCAL_ENV.exists():
 elif ROOT_ENV.exists():
     load_dotenv(ROOT_ENV)
 
-# Đọc cấu hình từ biến môi trường (mặc định cho môi trường Windows kết nối Docker)
-DB_HOST = os.getenv("POSTGRES_HOST", "127.0.0.1")
-DB_PORT = os.getenv("POSTGRES_PORT", "5433")
-DB_NAME = os.getenv("POSTGRES_DB", "webgis_msvt")
-DB_USER = os.getenv("POSTGRES_USER", "webgis_admin")
-DB_PASS = os.getenv("POSTGRES_PASSWORD", "")
+# 1. Đọc chuỗi kết nối DATABASE_URL từ biến môi trường (ưu tiên hàng đầu cho Production / Cloud / Vercel)
+raw_database_url = os.getenv("DATABASE_URL")
+if raw_database_url and raw_database_url.strip():
+    clean_url = raw_database_url.strip()
+    # Chuẩn hóa URI cho driver psycopg (v3) tương thích hoàn toàn với SQLAlchemy 2
+    # Các nhà cung cấp PostgreSQL đám mây (Neon, Supabase, Railway, Vercel Postgres)
+    # thường trả về URI bắt đầu bằng 'postgres://' hoặc 'postgresql://'
+    if clean_url.startswith("postgres://"):
+        DATABASE_URL = clean_url.replace("postgres://", "postgresql+psycopg://", 1)
+    elif clean_url.startswith("postgresql://") and not clean_url.startswith("postgresql+"):
+        DATABASE_URL = clean_url.replace("postgresql://", "postgresql+psycopg://", 1)
+    else:
+        DATABASE_URL = clean_url
+else:
+    # 2. Cấu hình fallback cho môi trường Windows kết nối Docker container local
+    DB_HOST = os.getenv("POSTGRES_HOST", "127.0.0.1")
+    DB_PORT = os.getenv("POSTGRES_PORT", "5433")
+    DB_NAME = os.getenv("POSTGRES_DB", "webgis_msvt")
+    DB_USER = os.getenv("POSTGRES_USER", "webgis_admin")
+    DB_PASS = os.getenv("POSTGRES_PASSWORD", "")
+    DATABASE_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-# Sử dụng driver psycopg (v3) tương thích hoàn toàn với SQLAlchemy 2
-DATABASE_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# Phát hiện môi trường Serverless (Vercel / AWS Lambda)
+IS_SERVERLESS = bool(os.getenv("VERCEL")) or bool(os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
 
-# Khởi tạo engine với pool_pre_ping để tự động khôi phục kết nối khi container khởi động lại
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
-    echo=False
-)
+if IS_SERVERLESS:
+    # Trên Vercel Serverless Function, sử dụng NullPool để đóng kết nối ngay sau khi hoàn tất request,
+    # tránh làm cạn kiệt connection pool của dịch vụ PostgreSQL Cloud khi có nhiều function instances.
+    from sqlalchemy.pool import NullPool
+    engine = create_engine(
+        DATABASE_URL,
+        poolclass=NullPool,
+        echo=False
+    )
+else:
+    # Môi trường máy chủ thông thường / Local development
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        pool_size=10,
+        max_overflow=20,
+        echo=False
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

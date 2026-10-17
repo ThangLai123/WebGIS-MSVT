@@ -10,10 +10,16 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+.pytest_cache/
 
-# Build artifacts
+# Build artifacts & Serverless
 dist/
 build/
+.vercel/
+
+# Temporary imports & uploaded files
+temp_imports/
+**/temp_imports/
 
 # Log files
 *.log
@@ -25,3 +31,5 @@ yarn-error.log*
 # Database data directories (if any local mounts)
 webgis_postgis_data/
 mongodb_data/
+*.dump
+*.bak
