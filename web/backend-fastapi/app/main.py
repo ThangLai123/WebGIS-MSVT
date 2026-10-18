@@ -18,7 +18,8 @@ app = FastAPI(
     description="Hệ thống Backend FastAPI quản lý Mã số Vùng trồng (MSVT) - Tỉnh Nghệ An",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    openapi_url="/openapi.json"
 )
 
 # Cấu hình CORS: Cho phép các domain Frontend chỉ định, hỗ trợ credentials cookie, không dùng wildcard
@@ -86,8 +87,33 @@ def root():
     return {
         "message": "Chào mừng đến với Hệ thống WebGIS Quản lý Mã số Vùng trồng (MSVT) API",
         "docs": "/docs",
+        "redoc": "/redoc",
+        "openapi": "/openapi.json",
         "health": "/health",
         "auth_api": "/api/auth",
         "regions_api": "/api/regions",
         "geojson_api": "/api/regions/geojson"
     }
+
+
+@app.get("/api", summary="Điểm kiểm tra danh mục API")
+def api_root():
+    return {
+        "message": "WebGIS MSVT API Gateway",
+        "docs": "/docs",
+        "endpoints": {
+            "geojson": "/api/regions/geojson",
+            "regions": "/api/regions",
+            "statistics": "/api/statistics",
+            "lookup": "/api/regions/lookup",
+            "auth": "/api/auth/login"
+        }
+    }
+
+
+@app.get("/api/index.py", include_in_schema=False)
+@app.get("/api/index", include_in_schema=False)
+def legacy_index_redirect():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/", status_code=status.HTTP_308_PERMANENT_REDIRECT)
+
