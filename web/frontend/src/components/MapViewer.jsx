@@ -150,16 +150,6 @@ const MapViewer = ({
   // Theo dõi mức zoom hiện tại để cập nhật Chú giải thích ứng
   const [currentZoom, setCurrentZoom] = useState(defaultZoomLevel);
   const [stats, setStats] = useState({ pointCount: 17, polyCount: 25 });
-  const [copiedCoord, setCopiedCoord] = useState(false);
-
-  const handleCopyCoord = (coordText) => {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(coordText).then(() => {
-        setCopiedCoord(true);
-        setTimeout(() => setCopiedCoord(false), 2200);
-      }).catch(() => {});
-    }
-  };
 
   const handleStatsUpdate = useCallback((newStats) => {
     if (newStats) {
@@ -255,7 +245,7 @@ const MapViewer = ({
                     href={`https://www.google.com/maps?q=${clickedCoord.lat},${clickedCoord.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="map-coord-btn-gmaps"
+                    className="msvt-gps-btn btn-gmaps"
                     style={{ justifyContent: 'center' }}
                   >
                     🗺️ Đối chiếu Google Maps
@@ -282,60 +272,6 @@ const MapViewer = ({
 
       {/* Chú giải Bản đồ Tối giản (Collapsible Minimalist Legend) */}
       <MsvtLegend stats={stats} />
-
-      {/* Thanh hiển thị tọa độ click trên bản đồ */}
-      {clickedCoord && (
-        <div className="map-coord-bar">
-          <div className="map-coord-info">
-            <span className="map-coord-title">📍 TỌA ĐỘ VỪA CHỌN:</span>
-            <span className="map-coord-val">
-              {clickedCoord.lat}, {clickedCoord.lng}
-            </span>
-            <span className="map-coord-dms">
-              ({decimalToDms(clickedCoord.lat, true)}, {decimalToDms(clickedCoord.lng, false)})
-            </span>
-          </div>
-
-          <div className="map-coord-actions">
-            <button
-              type="button"
-              className="map-coord-btn-copy"
-              onClick={() => handleCopyCoord(`${clickedCoord.lat}, ${clickedCoord.lng}`)}
-              title="Sao chép cặp tọa độ vào bộ nhớ tạm"
-            >
-              <span>{copiedCoord ? '✅ Đã sao chép' : '📋 Sao chép tọa độ'}</span>
-            </button>
-
-            <a
-              href={`https://www.google.com/maps?q=${clickedCoord.lat},${clickedCoord.lng}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="map-coord-btn-gmaps"
-              title="Đối chiếu tọa độ GPS trên Google Maps"
-            >
-              <span>🗺️ Đối chiếu Google Maps</span>
-            </a>
-
-            <button
-              type="button"
-              className="map-coord-btn-locate"
-              onClick={() => onFlyToCoord && onFlyToCoord(clickedCoord)}
-              title="Phóng nhanh đến điểm GPS này"
-            >
-              <span>📍 Phóng đến điểm GPS</span>
-            </button>
-
-            <button
-              type="button"
-              className="map-coord-btn-lookup"
-              onClick={() => onQuickLookupCoord && onQuickLookupCoord(clickedCoord)}
-              title="Tra cứu vùng trồng bao phủ"
-            >
-              <span>🔎 Tra cứu</span>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
