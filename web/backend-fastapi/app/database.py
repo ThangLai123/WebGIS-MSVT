@@ -16,8 +16,10 @@ elif ROOT_ENV.exists():
 
 # 1. Đọc chuỗi kết nối DATABASE_URL từ biến môi trường (ưu tiên hàng đầu cho Production / Cloud / Vercel)
 raw_database_url = os.getenv("DATABASE_URL")
-if raw_database_url and raw_database_url.strip():
-    clean_url = raw_database_url.strip()
+IS_DATABASE_URL_CONFIGURED = bool(raw_database_url and raw_database_url.strip())
+
+if IS_DATABASE_URL_CONFIGURED and raw_database_url:
+    clean_url = raw_database_url.strip().strip("\"'")
     # Chuẩn hóa URI cho driver psycopg (v3) tương thích hoàn toàn với SQLAlchemy 2
     # Các nhà cung cấp PostgreSQL đám mây (Neon, Supabase, Railway, Vercel Postgres)
     # thường trả về URI bắt đầu bằng 'postgres://' hoặc 'postgresql://'
@@ -27,6 +29,11 @@ if raw_database_url and raw_database_url.strip():
         DATABASE_URL = clean_url.replace("postgresql://", "postgresql+psycopg://", 1)
     else:
         DATABASE_URL = clean_url
+
+    # Đảm bảo SSL mode bắt buộc cho kết nối Supabase Cloud / Pooler nếu người dùng chưa gắn vào URI
+    if ("supabase.co" in DATABASE_URL or "supabase.com" in DATABASE_URL or "pooler.supabase" in DATABASE_URL) and "sslmode=" not in DATABASE_URL:
+        separator = "&" if "?" in DATABASE_URL else "?"
+        DATABASE_URL = f"{DATABASE_URL}{separator}sslmode=require"
 else:
     # 2. Cấu hình fallback cho môi trường Windows kết nối Docker container local
     DB_HOST = os.getenv("POSTGRES_HOST", "127.0.0.1")
@@ -39,9 +46,15 @@ else:
 # Phát hiện môi trường Serverless (Vercel / AWS Lambda)
 IS_SERVERLESS = bool(os.getenv("VERCEL")) or bool(os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
 
-# Cấu hình search_path cho mọi phiên kết nối: tự động nhận diện cả schema public và extensions
-# Đảm bảo các hàm PostGIS (ST_Covers, ST_IsValid, v.v.) hoạt động trơn tru trên cả Local Docker và Supabase
-db_connect_args = {"options": "-csearch_path=public,extensions"}
+# Cấu hình connect_args cho psycopg 3:
+# - options: Cố định search_path ban đầu
+# - connect_timeout: 10 giây (ngăn serverless treo vô hạn nếu host/mạng không tiếp cận được)
+db_connect_args = {
+    "options": "-csearch_path=public,extensions",
+    "connect_timeout": 10
+}
+
+from sqlalchemy import event
 
 if IS_SERVERLESS:
     # Trên Vercel Serverless Function, sử dụng NullPool để đóng kết nối ngay sau khi hoàn tất request,
@@ -63,6 +76,22 @@ else:
         connect_args=db_connect_args,
         echo=False
     )
+
+
+@event.listens_for(engine, "connect")
+def set_search_path_on_connect(dbapi_connection, connection_record):
+    """
+    Đảm bảo mỗi phiên kết nối (kể cả qua Supabase Pooler) luôn có search_path = public, extensions.
+    Khắc phục triệt để trường hợp Connection Pooler không áp dụng tham số options từ chuỗi kết nối.
+    """
+    cursor = dbapi_connection.cursor()
+    try:
+        cursor.execute("SET search_path TO public, extensions;")
+    except Exception:
+        pass
+    finally:
+        cursor.close()
+
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
