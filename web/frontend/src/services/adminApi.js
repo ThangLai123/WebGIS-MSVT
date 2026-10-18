@@ -22,6 +22,55 @@ export const getCsrfToken = () => {
 };
 
 /**
+ * Chuyển đổi mã lỗi và trường validation Pydantic sang tiếng Việt thân thiện
+ */
+function translatePydanticError(err) {
+  if (!err) return '';
+  const locStr = Array.isArray(err.loc) ? err.loc.slice(1).join('.') : (err.loc || '');
+  let msg = err.msg || '';
+
+  // Dịch tên trường
+  const fieldNames = {
+    'geometry.point.longitude': 'Kinh độ (Longitude) của điểm mốc',
+    'geometry.point.latitude': 'Vĩ độ (Latitude) của điểm mốc',
+    'geometry.point': 'Tọa độ điểm mốc (Point)',
+    'geometry.geojson': 'Dữ liệu không gian GeoJSON',
+    'geometry': 'Dữ liệu hình học không gian',
+    'msvt_moi': 'Mã số vùng trồng mới',
+    'msvt_cu': 'Mã số vùng trồng cũ',
+    'dien_tich_ha': 'Diện tích (ha)',
+    'so_ho_tham_gia': 'Số hộ tham gia',
+    'so_dien_thoai': 'Số điện thoại',
+    'email': 'Email',
+    'to_chuc_ca_nhan': 'Tổ chức / cá nhân',
+    'nguoi_dai_dien': 'Người đại diện',
+    'dia_chi_msvt': 'Địa chỉ vùng trồng',
+    'loai_cay_trong': 'Loại cây trồng',
+    'tong_san_luong_tan': 'Tổng sản lượng (tấn)',
+    'san_luong_tan_ha': 'Năng suất (tấn/ha)',
+    'quy_trinh': 'Quy trình sản xuất',
+    'thi_truong': 'Thị trường tiêu thụ'
+  };
+
+  const friendlyField = fieldNames[locStr] || (locStr ? `Trường '${locStr}'` : '');
+
+  // Dịch thông điệp Pydantic phổ biến
+  if (msg.includes('Field required')) {
+    msg = 'Bắt buộc còn thiếu, vui lòng nhập giá trị hợp lệ';
+  } else if (msg.includes('Input should be a valid number')) {
+    msg = 'Giá trị phải là số hợp lệ';
+  } else if (msg.includes('Input should be a valid integer')) {
+    msg = 'Giá trị phải là số nguyên';
+  } else if (msg.includes('Input should be a valid string')) {
+    msg = 'Giá trị phải là chuỗi văn bản';
+  } else if (msg.startsWith('Value error, ')) {
+    msg = msg.replace('Value error, ', '');
+  }
+
+  return friendlyField ? `${friendlyField}: ${msg}` : msg;
+}
+
+/**
  * Xử lý lỗi trả về từ API backend và chuẩn hóa thành thông báo tiếng Việt thân thiện
  */
 async function handleResponseError(response) {
@@ -40,7 +89,7 @@ async function handleResponseError(response) {
 
   if (Array.isArray(detail)) {
     // Trường hợp lỗi validation Pydantic (422)
-    detailMessage = detail.map(d => `${d.loc ? d.loc.slice(1).join('.') + ': ' : ''}${d.msg}`).join('; ');
+    detailMessage = detail.map(d => translatePydanticError(d)).join('; ');
   } else if (typeof detail === 'string') {
     detailMessage = detail;
   } else if (detail && typeof detail === 'object') {
@@ -48,28 +97,42 @@ async function handleResponseError(response) {
     detailMessage = detail.message || detail.reason || JSON.stringify(detail);
   }
 
+  let finalError;
   switch (response.status) {
     case 401:
-      return new Error(detailMessage || 'Chưa đăng nhập hoặc phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
+      finalError = new Error(detailMessage || 'Chưa đăng nhập hoặc phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
+      break;
     case 403:
-      return new Error(detailMessage || 'Bạn không có quyền thực hiện thao tác này hoặc CSRF token không hợp lệ.');
+      finalError = new Error(detailMessage || 'Bạn không có quyền thực hiện thao tác này hoặc CSRF token không hợp lệ.');
+      break;
     case 404:
-      return new Error(detailMessage || 'Không tìm thấy dữ liệu yêu cầu.');
+      finalError = new Error(detailMessage || 'Không tìm thấy dữ liệu yêu cầu.');
+      break;
     case 409:
-      return new Error(detailMessage || 'Mã số vùng trồng đã tồn tại trên hệ thống. Không thể tạo trùng lặp.');
+      finalError = new Error(detailMessage || 'Mã số vùng trồng đã tồn tại trên hệ thống. Không thể tạo trùng lặp.');
+      break;
     case 422:
-      return new Error(detailMessage || 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại các trường thông tin.');
+      finalError = new Error(detailMessage || 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại các trường thông tin.');
+      break;
     case 423:
-      return new Error(detailMessage || 'Tài khoản đang bị tạm khóa do nhập sai mật khẩu quá nhiều lần.');
+      finalError = new Error(detailMessage || 'Tài khoản đang bị tạm khóa do nhập sai mật khẩu quá nhiều lần.');
+      break;
     case 500:
-      return new Error(detailMessage || 'Lỗi máy chủ nội bộ. Vui lòng thử lại sau.');
+      finalError = new Error(detailMessage || 'Lỗi máy chủ nội bộ. Vui lòng thử lại sau.');
+      break;
     case 502:
     case 503:
     case 504:
-      return new Error(detailMessage || 'Dịch vụ backend hoặc cơ sở dữ liệu tạm thời không phản hồi. Vui lòng thử lại sau giây lát.');
+      finalError = new Error(detailMessage || 'Dịch vụ backend hoặc cơ sở dữ liệu tạm thời không phản hồi. Vui lòng thử lại sau giây lát.');
+      break;
     default:
-      return new Error(detailMessage || `Yêu cầu thất bại (${response.status}: ${response.statusText})`);
+      finalError = new Error(detailMessage || `Yêu cầu thất bại (${response.status}: ${response.statusText})`);
+      break;
   }
+  if (detail) {
+    finalError.detail = detail;
+  }
+  return finalError;
 }
 
 export const adminApi = {

@@ -5,6 +5,7 @@ import MsvtAdminTable from './MsvtAdminTable';
 import MsvtRegionForm from './MsvtRegionForm';
 import MsvtDeleteDialog from './MsvtDeleteDialog';
 import MsvtImportModal from './MsvtImportModal';
+import ErrorBoundary from './ErrorBoundary';
 import './MsvtAdminDashboard.css';
 
 const MsvtAdminDashboard = ({
@@ -380,13 +381,15 @@ const MsvtAdminDashboard = ({
 
       {/* Modal Thêm / Sửa */}
       {isFormOpen && (
-        <MsvtRegionForm
-          isOpen={isFormOpen}
-          region={selectedForEdit}
-          clickedCoord={clickedCoord}
-          onClose={() => setIsFormOpen(false)}
-          onSuccess={handleFormSuccess}
-        />
+        <ErrorBoundary onReset={() => setIsFormOpen(false)}>
+          <MsvtRegionForm
+            isOpen={isFormOpen}
+            region={selectedForEdit}
+            clickedCoord={clickedCoord}
+            onClose={() => setIsFormOpen(false)}
+            onSuccess={handleFormSuccess}
+          />
+        </ErrorBoundary>
       )}
 
       {/* Modal Xác nhận Xóa mềm */}

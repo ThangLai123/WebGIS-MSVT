@@ -5,6 +5,7 @@ import MsvtSidebar from './components/MsvtSidebar';
 import MsvtStatsModal from './components/MsvtStatsModal';
 import AdminLogin from './components/AdminLogin';
 import MsvtAdminDashboard from './components/MsvtAdminDashboard';
+import ErrorBoundary from './components/ErrorBoundary';
 import adminApi from './services/adminApi';
 import msvtApi from './services/msvtApi';
 import './App.css';
@@ -207,13 +208,15 @@ function App() {
       />
 
       {/* Dashboard Quản trị MSVT (Chỉ hiển thị khi tài khoản có quyền Admin) */}
-      <MsvtAdminDashboard
-        isOpen={showAdminDashboard && currentUser?.role === 'admin'}
-        onClose={() => setShowAdminDashboard(false)}
-        currentUser={currentUser}
-        onDataModified={handleMsvtDataModified}
-        clickedCoord={clickedCoord}
-      />
+      <ErrorBoundary onReset={() => setShowAdminDashboard(false)}>
+        <MsvtAdminDashboard
+          isOpen={showAdminDashboard && currentUser?.role === 'admin'}
+          onClose={() => setShowAdminDashboard(false)}
+          currentUser={currentUser}
+          onDataModified={handleMsvtDataModified}
+          clickedCoord={clickedCoord}
+        />
+      </ErrorBoundary>
     </div>
   );
 }

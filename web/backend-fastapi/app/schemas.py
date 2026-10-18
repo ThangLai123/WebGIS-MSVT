@@ -1,7 +1,7 @@
 import re
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 
 
 class RegionListItem(BaseModel):
@@ -137,6 +137,19 @@ class PointCoordinates(BaseModel):
     longitude: float = Field(..., ge=-180.0, le=180.0, description="Kinh độ [-180, 180]")
     latitude: float = Field(..., ge=-90.0, le=90.0, description="Vĩ độ [-90, 90]")
 
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_lat_lng(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            lat = data.get("latitude") if "latitude" in data else data.get("lat")
+            lng = data.get("longitude") if "longitude" in data else (data.get("lng") if "lng" in data else data.get("lon"))
+            if lat is not None and lng is not None:
+                return {
+                    "latitude": float(lat),
+                    "longitude": float(lng)
+                }
+        return data
+
 
 class GeometryInput(BaseModel):
     """
@@ -149,6 +162,28 @@ class GeometryInput(BaseModel):
     geojson: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(extra="forbid")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_geometry_input(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Nếu client gửi trực tiếp { "latitude": ..., "longitude": ... } hoặc { "lat": ..., "lng": ... }
+            if "point" not in data and "geojson" not in data:
+                lat = data.get("latitude") if "latitude" in data else data.get("lat")
+                lng = data.get("longitude") if "longitude" in data else (data.get("lng") if "lng" in data else data.get("lon"))
+                if lat is not None and lng is not None:
+                    try:
+                        return {"point": {"latitude": float(lat), "longitude": float(lng)}}
+                    except (ValueError, TypeError):
+                        pass
+                if "type" in data and "coordinates" in data:
+                    return {"geojson": data}
+            # Nếu cả point và geojson cùng được gửi và geojson là Point, ưu tiên point
+            if data.get("point") is not None and data.get("geojson") is not None:
+                gtype = data["geojson"].get("type") if isinstance(data["geojson"], dict) else None
+                if gtype == "Point":
+                    return {"point": data["point"]}
+        return data
 
     @field_validator("geojson")
     @classmethod

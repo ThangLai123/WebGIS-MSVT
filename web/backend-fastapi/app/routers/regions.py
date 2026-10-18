@@ -123,14 +123,18 @@ def validate_strict_geometry(
         return None, None, True
 
     if geom_input.point is not None and geom_input.geojson is not None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail={
-                "code": "AMBIGUOUS_GEOMETRY",
-                "message": "Không thể gửi đồng thời cả Point và Polygon. Vui lòng chỉ chọn một loại hình học.",
-                "reason": "Both Point and GeoJSON provided"
-            }
-        )
+        gtype = geom_input.geojson.get("type") if isinstance(geom_input.geojson, dict) else None
+        if gtype == "Point":
+            geom_input.geojson = None
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={
+                    "code": "AMBIGUOUS_GEOMETRY",
+                    "message": "Không thể gửi đồng thời cả Point và Polygon. Vui lòng chỉ chọn một loại hình học.",
+                    "reason": "Both Point and GeoJSON provided"
+                }
+            )
 
     # 1. Xử lý và kiểm định Point
     if geom_input.point is not None:

@@ -287,7 +287,7 @@ const MsvtRegionForm = ({
       };
     }
 
-    // 1 điểm Point
+    // 1 điểm Point (Section V đề bài)
     if (vertices.length === 1) {
       const p = vertices[0];
       if (isNaN(p.lat) || isNaN(p.lng) || p.lat < -90 || p.lat > 90 || p.lng < -180 || p.lng > 180) {
@@ -298,18 +298,10 @@ const MsvtRegionForm = ({
           canSubmit: false
         };
       }
-      if (!hasConfirmedBoundary) {
-        return {
-          state: 'valid_unconfirmed',
-          label: 'Point hợp lệ - Chưa xác nhận',
-          message: 'Tọa độ điểm mốc hợp lệ. Vui lòng xem vị trí trên bản đồ và tích chọn xác nhận để mở khóa nút lưu.',
-          canSubmit: false
-        };
-      }
       return {
         state: 'valid_confirmed',
-        label: 'Point hợp lệ & Đã xác nhận',
-        message: 'Điểm mốc đại diện hợp lệ và đã được xác nhận vị trí.',
+        label: 'Điểm vị trí vùng trồng (Point)',
+        message: `Tọa độ điểm mốc hợp lệ: Vĩ độ (Lat) = ${p.lat.toFixed(6)}, Kinh độ (Lng) = ${p.lng.toFixed(6)}. Hệ quy chiếu WGS84 (EPSG:4326). Sẵn sàng lưu dữ liệu.`,
         canSubmit: true
       };
     }
@@ -380,9 +372,9 @@ const MsvtRegionForm = ({
     // 2. Số đỉnh
     let vertexStatus = { pass: false, text: '0 điểm' };
     if (vertices.length === 1) {
-      vertexStatus = { pass: true, text: '1 điểm (Point đại diện)' };
+      vertexStatus = { pass: true, text: '1 điểm (Điểm vị trí vùng trồng Point)' };
     } else if (vertices.length === 2) {
-      vertexStatus = { pass: false, text: '2 điểm (Không đủ tạo Polygon)' };
+      vertexStatus = { pass: false, text: '2 điểm (Cần tối thiểu 3 đỉnh phân biệt để tạo Polygon hoặc 1 điểm cho Point)' };
     } else if (vertices.length >= 3) {
       vertexStatus = { pass: true, text: `${vertices.length} đỉnh (Đạt yêu cầu ≥ 3)` };
     }
@@ -401,7 +393,9 @@ const MsvtRegionForm = ({
 
     // 5. ST_IsValid
     let isValidStatus = { pass: null, text: 'Chưa kiểm định' };
-    if (postgisValidation) {
+    if (vertices.length === 1) {
+      isValidStatus = { pass: true, text: 'True (Point EPSG:4326 hợp lệ)' };
+    } else if (postgisValidation) {
       isValidStatus = postgisValidation.is_valid
         ? { pass: true, text: 'True (PostGIS Hợp lệ)' }
         : { pass: false, text: `False (${postgisValidation.reason})` };
@@ -409,13 +403,13 @@ const MsvtRegionForm = ({
       isValidStatus = validationResult.isValid
         ? { pass: true, text: 'True (Topology chuẩn)' }
         : { pass: false, text: `False (${validationResult.message})` };
-    } else if (vertices.length === 1) {
-      isValidStatus = { pass: true, text: 'True (Point chuẩn)' };
     }
 
     // 6. Diện tích hình học
     let areaText = '0.00 ha';
-    if (postgisValidation && postgisValidation.area_ha !== null && postgisValidation.area_ha !== undefined) {
+    if (vertices.length === 1) {
+      areaText = '0 ha (Hình học dạng Điểm - Point)';
+    } else if (postgisValidation && postgisValidation.area_ha !== null && postgisValidation.area_ha !== undefined) {
       areaText = `${postgisValidation.area_ha} ha`;
     } else if (validationResult.areaHa !== null && validationResult.areaHa !== undefined) {
       areaText = `${validationResult.areaHa} ha`;
@@ -424,7 +418,10 @@ const MsvtRegionForm = ({
     // 7. Sai lệch diện tích
     let devText = 'Chưa có hồ sơ';
     let devPass = true;
-    if (postgisValidation && postgisValidation.deviation_pct !== null && postgisValidation.deviation_pct !== undefined) {
+    if (vertices.length === 1) {
+      devText = 'Không áp dụng cho Point';
+      devPass = true;
+    } else if (postgisValidation && postgisValidation.deviation_pct !== null && postgisValidation.deviation_pct !== undefined) {
       devText = `${postgisValidation.deviation_pct}% (${postgisValidation.label})`;
       if (postgisValidation.rating === 'WARNING') devPass = false;
     } else if (validationResult.areaEvaluation && validationResult.areaEvaluation.deviationPct !== null && validationResult.areaEvaluation.deviationPct !== undefined) {
@@ -433,9 +430,11 @@ const MsvtRegionForm = ({
     }
 
     // 8. Xác nhận ranh giới
-    const confirmStatus = hasConfirmedBoundary
-      ? { pass: true, text: 'Đã xác nhận ranh giới' }
-      : { pass: false, text: 'Chưa xác nhận' };
+    const confirmStatus = vertices.length === 1
+      ? { pass: true, text: 'Tự động xác nhận (Điểm vị trí Point)' }
+      : (hasConfirmedBoundary
+        ? { pass: true, text: 'Đã xác nhận ranh giới' }
+        : { pass: false, text: 'Chưa xác nhận' });
 
     return [
       { id: 1, name: '1. Định dạng tọa độ', ...formatStatus },
@@ -719,6 +718,15 @@ const MsvtRegionForm = ({
     setHistoryIndex(0);
     setHasConfirmedBoundary(false);
     setPostgisValidation(null);
+
+    // Tự động đồng bộ chế độ hình học nếu đang ở chế độ Sửa
+    if (isEdit && editGeomMode !== 'keep') {
+      if (batch.vertices.length === 1 && editGeomMode === 'update_polygon') {
+        setEditGeomMode('update_point');
+      } else if (batch.vertices.length >= 3 && editGeomMode === 'update_point') {
+        setEditGeomMode('update_polygon');
+      }
+    }
   };
 
   // 4 Nút Thao tác Kiểm định (Section XII):
@@ -827,172 +835,6 @@ const MsvtRegionForm = ({
     if (previewMapRef.current) {
       previewMapRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-  };
-
-  // Mẫu tọa độ Thực tế 18 điểm - 4 Nhóm Đ1..Đ5, N/E, khoảng trắng bất thường (Section II đề bài)
-  const handleLoadSample18Points = () => {
-    const raw18 = `Đ1: 18.997412 N, 105.52339 E,
-Đ2: 18.99728 N, 105. 523277 E,
-Đ3: 18.997331 N, 105. 523887 E,
-Đ4: 18.996698 N, 105.52348 E;
-
-Đ1: 19.06788 N, 105.45612 E,
-Đ2: 19.06789 N, 105. 45619 E,
-Đ3: 19.06808 N, 105. 46045 E,
-Đ4: 19.06792 N, 105.45697 E;
-
-Đ1: 19.05065 N, 105.45769 E,
-Đ2: 19.04986 N, 105.45818 E,
-Đ3: 19.04948 N, 105.45845 E,
-Đ4: 19.04867 N, 105.45842 E,
-Đ5: 19.05002 N, 105.45749 E;
-
-Đ1: 19.11937 N, 105.51659 E,
-Đ2: 19.11938 N, 105.51686 E,
-Đ3: 19.11513 N, 105.51783 E,
-Đ4: 19.11069 N, 105.51179 E,
-Đ5: 19.11071 N, 105.51860 E.`;
-    setCoordMode('auto');
-    setCoordInputText(raw18);
-    const batch = parseCoordinatesBatch(raw18, 'auto');
-    setVertices(batch.vertices);
-    setOriginalVertices(batch.vertices);
-    setIsDraft(false);
-    setHistory([batch.vertices]);
-    setHistoryIndex(0);
-    setMultiGroupMode('unconfirmed');
-    setSelectedGroupTab('all');
-    setCustomGroupNames({});
-    setCheckedGroups({});
-    setEditGeomMode('update_polygon');
-    setHasConfirmedBoundary(false);
-    setShowSimulationHull(false);
-    setFitBoundsTrigger(prev => prev + 1);
-  };
-
-  // Mẫu tọa độ Vùng MSVT #38 (6 điểm tự giao cắt giữa cạnh 2-3 và 4-5)
-  const handleLoadSampleRegion38 = () => {
-    const r38Text = `18.756488, 105.685531
-18.756601, 105.685789
-18.756658, 105.685778
-18.756692, 105.685873
-18.756302, 105.685084
-18.756143, 105.685698`;
-    setCoordMode('auto');
-    setCoordInputText(r38Text);
-    const batch = parseCoordinatesBatch(r38Text, 'auto');
-    setVertices(batch.vertices);
-    setOriginalVertices(batch.vertices);
-    setIsDraft(false);
-    setHistory([batch.vertices]);
-    setHistoryIndex(0);
-    setFormData(prev => ({ ...prev, dien_tich_ha: '0.15' }));
-    setEditGeomMode('update_polygon');
-    setHasConfirmedBoundary(false);
-    setShowSimulationHull(false);
-    setShowCandidatesDrawer(true);
-    setFitBoundsTrigger(prev => prev + 1);
-  };
-
-  // Mẫu tọa độ Nhóm B (5 cặp DMS đề bài)
-  const handleLoadSampleDms = () => {
-    const dmsText = `19o10'50.90'';105o34'33.08''
-19o10'50.92'';105o34'29.94''
-19o11'06.73'';105o34'24.27''
-19o11'08.32'';105o34'28.80''
-19o10'59.24'';105o34'29.24''`;
-    setCoordMode('auto');
-    setCoordInputText(dmsText);
-    const batch = parseCoordinatesBatch(dmsText, 'auto');
-    setVertices(batch.vertices);
-    setOriginalVertices(batch.vertices);
-    setIsDraft(false);
-    setHistory([batch.vertices]);
-    setHistoryIndex(0);
-    setEditGeomMode('update_polygon');
-    setHasConfirmedBoundary(false);
-    setShowSimulationHull(false);
-    setFitBoundsTrigger(prev => prev + 1);
-  };
-
-  // Mẫu tọa độ Decimal hợp lệ
-  const handleLoadSampleDecimal = () => {
-    const decText = `19.020000, 105.550000
-19.021000, 105.553000
-19.023500, 105.554000
-19.024000, 105.550500
-19.021500, 105.548000`;
-    setCoordMode('decimal');
-    setCoordInputText(decText);
-    const batch = parseCoordinatesBatch(decText, 'decimal');
-    setVertices(batch.vertices);
-    setOriginalVertices(batch.vertices);
-    setIsDraft(false);
-    setHistory([batch.vertices]);
-    setHistoryIndex(0);
-    setEditGeomMode('update_polygon');
-    setHasConfirmedBoundary(false);
-    setShowSimulationHull(false);
-    setFitBoundsTrigger(prev => prev + 1);
-  };
-
-  // Mẫu tọa độ có điểm trùng (Nhóm F đề bài: điểm 1 và điểm 3 trùng)
-  const handleLoadSampleDuplicate = () => {
-    const dupText = `18.962467,105.439265
-18.963549,105.441808
-18.962467,105.439265
-18.963285,105.441808
-18.965559,105.441246`;
-    setCoordMode('auto');
-    setCoordInputText(dupText);
-    const batch = parseCoordinatesBatch(dupText, 'auto');
-    setVertices(batch.vertices);
-    setOriginalVertices(batch.vertices);
-    setIsDraft(false);
-    setHistory([batch.vertices]);
-    setHistoryIndex(0);
-    setEditGeomMode('update_polygon');
-    setHasConfirmedBoundary(false);
-    setShowSimulationHull(true);
-    setFitBoundsTrigger(prev => prev + 1);
-  };
-
-  // Mẫu tọa độ tự cắt (Bow-tie / Hourglass - Nhóm G)
-  const handleLoadSampleBowtie = () => {
-    const bowtieText = `19.020000, 105.550000
-19.024000, 105.554000
-19.024000, 105.550000
-19.020000, 105.554000`;
-    setCoordMode('auto');
-    setCoordInputText(bowtieText);
-    const batch = parseCoordinatesBatch(bowtieText, 'auto');
-    setVertices(batch.vertices);
-    setOriginalVertices(batch.vertices);
-    setIsDraft(false);
-    setHistory([batch.vertices]);
-    setHistoryIndex(0);
-    setEditGeomMode('update_polygon');
-    setHasConfirmedBoundary(false);
-    setShowSimulationHull(true);
-    setFitBoundsTrigger(prev => prev + 1);
-  };
-
-  // Mẫu tọa độ đúng 2 điểm (theo yêu cầu đề bài)
-  const handleLoadSample2Points = () => {
-    const text2Points = `18.815368, 105.606360\n18.817680, 105.602557`;
-    setCoordMode('auto');
-    setCoordInputText(text2Points);
-    const batch = parseCoordinatesBatch(text2Points, 'auto');
-    setVertices(batch.vertices);
-    setOriginalVertices(batch.vertices);
-    setIsDraft(false);
-    setHistory([batch.vertices]);
-    setHistoryIndex(0);
-    setEditGeomMode('keep');
-    setHasConfirmedBoundary(false);
-    setShowSimulationHull(false);
-    setTwoPointsMode('line');
-    setFitBoundsTrigger(prev => prev + 1);
   };
 
   // Thêm một đỉnh mới thủ công
@@ -1244,63 +1086,49 @@ const MsvtRegionForm = ({
         return;
       }
       payload.geometry = { geojson: multiPoly };
-    } else if (isEdit) {
-      if (editGeomMode === 'keep') {
-        if (!oldGeometry) {
-          setErrorMessage('Vùng trồng này chưa có dữ liệu không gian. Chế độ kiểm soát nghiêm ngặt bắt buộc bạn phải bổ sung tọa độ Point hoặc Polygon hợp lệ.');
-          return;
-        }
-        // Giữ nguyên geometry: KHÔNG đính kèm payload.geometry -> backend PATCH bảo toàn nguyên vẹn 100%
-      } else if (editGeomMode === 'update_point') {
-        if (vertices.length !== 1 || isNaN(vertices[0].lat) || isNaN(vertices[0].lng)) {
-          setErrorMessage('Chế độ "Cập nhật Point" yêu cầu nhập đúng 1 cặp tọa độ GPS hợp lệ.');
-          return;
-        }
-        if (!hasConfirmedBoundary) {
-          setErrorMessage('Vui lòng xem trước vị trí Point trên bản đồ và tích chọn xác nhận trước khi lưu.');
-          return;
-        }
-        payload.geometry = { point: { lat: vertices[0].lat, lng: vertices[0].lng } };
-      } else if (editGeomMode === 'update_polygon') {
-        if (vertices.length < 3) {
-          setErrorMessage('Không thể lưu: Cần tối thiểu 3 đỉnh phân biệt để tạo Polygon.');
-          return;
-        }
-        if (!validationResult.isValid) {
-          setErrorMessage(`Không thể lưu hình học: ${validationResult.message}. Lưu ý: Vùng mô phỏng chỉ dùng để tham khảo, không được tự động lưu.`);
-          return;
-        }
-        if (!hasConfirmedBoundary) {
-          setErrorMessage('Vui lòng xem trước ranh giới và tích chọn xác nhận trước khi lưu.');
-          return;
-        }
-        payload.geometry = { geojson: validationResult.geojson };
+    } else if (isEdit && editGeomMode === 'keep') {
+      if (!oldGeometry) {
+        setErrorMessage('Vùng trồng này chưa có dữ liệu không gian. Chế độ kiểm soát nghiêm ngặt bắt buộc bạn phải bổ sung tọa độ Point hoặc Polygon hợp lệ.');
+        return;
       }
+      // TUYỆT ĐỐI BẢO TOÀN HÌNH HỌC CŨ: Không gửi trường geometry sang backend PATCH
+      delete payload.geometry;
     } else {
-      // Khi thêm mới: Bắt buộc phải có tọa độ Point hoặc Polygon hợp lệ đã xác nhận
-      if (vertices.length >= 3) {
-        if (!validationResult.isValid) {
-          setErrorMessage(`Không thể lưu hình học: ${validationResult.message}. Lưu ý: Vùng mô phỏng chỉ dùng để tham khảo, không được tự động lưu.`);
-          return;
-        }
-        if (!hasConfirmedBoundary) {
-          setErrorMessage('Vui lòng xem trước ranh giới và tích chọn xác nhận trước khi lưu.');
-          return;
-        }
-        payload.geometry = { geojson: validationResult.geojson };
-      } else if (vertices.length === 1) {
+      // Trường hợp Thêm mới HOẶC Cập nhật hình học (isEdit && editGeomMode !== 'keep')
+      if (vertices.length === 1) {
         if (isNaN(vertices[0].lat) || isNaN(vertices[0].lng)) {
           setErrorMessage('Tọa độ Point không hợp lệ.');
           return;
         }
-        if (!hasConfirmedBoundary) {
-          setErrorMessage('Vui lòng xem trước điểm mốc trên bản đồ và tích chọn xác nhận trước khi lưu.');
+        if (vertices[0].lat < -90 || vertices[0].lat > 90 || vertices[0].lng < -180 || vertices[0].lng > 180) {
+          setErrorMessage('Tọa độ Point nằm ngoài phạm vi WGS84 (Vĩ độ [-90, 90], Kinh độ [-180, 180]).');
           return;
         }
-        payload.geometry = { point: { lat: vertices[0].lat, lng: vertices[0].lng } };
-      } else {
-        setErrorMessage('Không thể thêm mới vùng trồng: Bắt buộc phải có tọa độ Point hoặc Polygon hợp lệ đã được xác nhận.');
+        // Gửi cấu trúc Point chuẩn theo Pydantic schema (latitude, longitude)
+        payload.geometry = {
+          point: {
+            latitude: Number(vertices[0].lat),
+            longitude: Number(vertices[0].lng)
+          }
+        };
+      } else if (vertices.length >= 3) {
+        if (!validationResult.isValid) {
+          setErrorMessage(`Không thể lưu hình học: ${validationResult.message}. Lưu ý: Vùng mô phỏng chỉ dùng để tham khảo, không được tự động lưu.`);
+          return;
+        }
+        if (!hasConfirmedBoundary) {
+          setErrorMessage('Vui lòng xem trước ranh giới và tích chọn xác nhận trước khi lưu.');
+          return;
+        }
+        payload.geometry = { geojson: validationResult.geojson };
+      } else if (vertices.length === 2) {
+        setErrorMessage('Không thể lưu: Bạn đã nhập 2 cặp tọa độ. Để lưu Điểm mốc (Point) vui lòng nhập chính xác 1 cặp tọa độ; để tạo Vùng ranh giới (Polygon) cần tối thiểu 3 đỉnh phân biệt.');
         return;
+      } else {
+        if (!isEdit) {
+          setErrorMessage('Không thể thêm mới vùng trồng: Bắt buộc phải có tọa độ Point hoặc Polygon hợp lệ.');
+          return;
+        }
       }
     }
 
@@ -1711,68 +1539,6 @@ const MsvtRegionForm = ({
                       </button>
                     </div>
                   </div>
-
-                  {/* Nạp nhanh dữ liệu mẫu kiểm thử */}
-                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                    <button
-                      type="button"
-                      className="msvt-btn-tool"
-                      style={{ backgroundColor: '#f3e8ff', color: '#6b21a8', fontWeight: 700, borderColor: '#a855f7' }}
-                      onClick={handleLoadSample18Points}
-                      title="Nạp 18 tọa độ GPS thực địa gồm 4 nhóm (Đ1..Đ5, N/E, khoảng trắng bất thường) để kiểm thử bộ phân nhóm và nhận diện"
-                    >
-                      📍 Thử 4 Lô Đ1..Đ5 (18đ N/E)
-                    </button>
-                    <button
-                      type="button"
-                      className="msvt-btn-tool"
-                      style={{ backgroundColor: '#ffedd5', color: '#c2410c', fontWeight: 700, borderColor: '#fb923c' }}
-                      onClick={handleLoadSampleRegion38}
-                      title="Nạp 6 tọa độ thực tế của Vùng #38 (Gặp lỗi tự giao cắt) để thử đề xuất phương án và đối chiếu diện tích"
-                    >
-                      📍 Thử Vùng #38 (Tự cắt 6đ)
-                    </button>
-                    <button
-                      type="button"
-                      className="msvt-btn-tool"
-                      onClick={handleLoadSample2Points}
-                      title="Nạp 2 tọa độ GPS mẫu (18.815368, 105.606360 & 18.817680, 105.602557)"
-                    >
-                      📍 2 điểm mẫu
-                    </button>
-                    <button
-                      type="button"
-                      className="msvt-btn-tool"
-                      onClick={handleLoadSampleDms}
-                      title="Nạp 5 cặp tọa độ DMS mẫu (Nhóm B đề bài)"
-                    >
-                      ⚡ 5 DMS mẫu
-                    </button>
-                    <button
-                      type="button"
-                      className="msvt-btn-tool"
-                      onClick={handleLoadSampleDecimal}
-                      title="Nạp 5 tọa độ Decimal hợp lệ"
-                    >
-                      ⚡ 5 Decimal mẫu
-                    </button>
-                    <button
-                      type="button"
-                      className="msvt-btn-tool"
-                      onClick={handleLoadSampleDuplicate}
-                      title="Nạp tọa độ có điểm trùng (Nhóm F)"
-                    >
-                      ⚠️ Thử điểm trùng
-                    </button>
-                    <button
-                      type="button"
-                      className="msvt-btn-tool"
-                      onClick={handleLoadSampleBowtie}
-                      title="Nạp tọa độ tự giao cắt (Nhóm G)"
-                    >
-                      ❌ Thử tự cắt (Bowtie)
-                    </button>
-                  </div>
                 </div>
 
 
@@ -1973,6 +1739,46 @@ const MsvtRegionForm = ({
                     </button>
                   </div>
                 </div>
+
+                {/* Chỉ báo Điểm vị trí vùng trồng (Point) chuẩn hóa khi nhập đúng 1 cặp tọa độ */}
+                {vertices.length === 1 && !isNaN(vertices[0].lat) && !isNaN(vertices[0].lng) && (
+                  <div className="msvt-point-detected-card" style={{
+                    margin: '10px 0',
+                    padding: '12px 16px',
+                    backgroundColor: '#eff6ff',
+                    border: '1.5px solid #3b82f6',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '12px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '26px' }}>📍</span>
+                      <div>
+                        <div style={{ fontSize: '14.5px', fontWeight: 700, color: '#1e40af' }}>
+                          Điểm vị trí vùng trồng (Point)
+                        </div>
+                        <div style={{ fontSize: '13px', color: '#1e3a8a', marginTop: '3px' }}>
+                          <strong>Vĩ độ (Latitude):</strong> {vertices[0].lat.toFixed(6)}° &nbsp;|&nbsp; <strong>Kinh độ (Longitude):</strong> {vertices[0].lng.toFixed(6)}°
+                          {vertices[0].format && <span style={{ marginLeft: '8px', fontSize: '11px', color: '#4b5563', backgroundColor: '#e0e7ff', padding: '1px 6px', borderRadius: '4px' }}>{vertices[0].format}</span>}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      backgroundColor: '#dbeafe',
+                      color: '#1d4ed8',
+                      padding: '5px 12px',
+                      borderRadius: '20px',
+                      border: '1px solid #93c5fd'
+                    }}>
+                      ✓ WGS84 EPSG:4326 • Sẵn sàng lưu
+                    </div>
+                  </div>
+                )}
 
                 {/* Tab 1: Ô nhập nhiều dòng cho phép dán trực tiếp */}
                 {activeCoordTab === 'paste' && (
@@ -3101,25 +2907,27 @@ const MsvtRegionForm = ({
                     </table>
                   </div>
 
-                  {/* Checkbox Xác nhận trước khi lưu (Bắt buộc cho cả Point, Polygon và MultiPolygon) */}
-                  <div className="msvt-boundary-confirm-box" style={{ marginTop: '12px' }}>
-                    <label className="msvt-boundary-confirm-label">
-                      <input
-                        type="checkbox"
-                        checked={hasConfirmedBoundary}
-                        onChange={(e) => setHasConfirmedBoundary(e.target.checked)}
-                        disabled={loading}
-                      />
-                      <span>
-                        <strong>Tôi đã xem trước trên bản đồ, đối chiếu ranh giới với thực tế và xác nhận dữ liệu tọa độ này là chính xác.</strong>
-                      </span>
-                    </label>
-                    {!hasConfirmedBoundary && (
-                      <div style={{ fontSize: '12px', color: '#b45309', marginTop: '4px', marginLeft: '24px' }}>
-                        ⚠️ Bắt buộc: Bạn phải xem trước trên bản đồ và tích xác nhận ranh giới để mở khóa nút Thêm hoặc Cập nhật vùng trồng.
-                      </div>
-                    )}
-                  </div>
+                  {/* Checkbox Xác nhận trước khi lưu (Chỉ bắt buộc cho Polygon hoặc MultiPolygon) */}
+                  {(vertices.length >= 3 || parsedBatch.isMultiGroup) && (
+                    <div className="msvt-boundary-confirm-box" style={{ marginTop: '12px' }}>
+                      <label className="msvt-boundary-confirm-label">
+                        <input
+                          type="checkbox"
+                          checked={hasConfirmedBoundary}
+                          onChange={(e) => setHasConfirmedBoundary(e.target.checked)}
+                          disabled={loading}
+                        />
+                        <span>
+                          <strong>Tôi đã xem trước trên bản đồ, đối chiếu ranh giới với thực tế và xác nhận dữ liệu tọa độ này là chính xác.</strong>
+                        </span>
+                      </label>
+                      {!hasConfirmedBoundary && (
+                        <div style={{ fontSize: '12px', color: '#b45309', marginTop: '4px', marginLeft: '24px' }}>
+                          ⚠️ Bắt buộc: Bạn phải xem trước trên bản đồ và tích xác nhận ranh giới để mở khóa nút Thêm hoặc Cập nhật vùng trồng.
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* BANNER THÔNG BÁO TRẠNG THÁI VALIDATION (SECTION IV & V) */}
                   <div className={`msvt-validation-banner status-${unifiedValidationStatus.state}`} style={{ marginTop: '12px' }}>
