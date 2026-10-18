@@ -27,7 +27,10 @@ export const getCsrfToken = () => {
 async function handleResponseError(response) {
   let errorData = null;
   try {
-    errorData = await response.json();
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      errorData = await response.json();
+    }
   } catch {
     errorData = null;
   }
@@ -60,6 +63,10 @@ async function handleResponseError(response) {
       return new Error(detailMessage || 'Tài khoản đang bị tạm khóa do nhập sai mật khẩu quá nhiều lần.');
     case 500:
       return new Error(detailMessage || 'Lỗi máy chủ nội bộ. Vui lòng thử lại sau.');
+    case 502:
+    case 503:
+    case 504:
+      return new Error(detailMessage || 'Dịch vụ backend hoặc cơ sở dữ liệu tạm thời không phản hồi. Vui lòng thử lại sau giây lát.');
     default:
       return new Error(detailMessage || `Yêu cầu thất bại (${response.status}: ${response.statusText})`);
   }

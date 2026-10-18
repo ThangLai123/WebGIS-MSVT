@@ -1,9 +1,25 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/msvt-api/:path*",
+      "destination": "https://web-gis-msvt-9mx3.vercel.app/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/msvt-api/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, max-age=0"
+        }
+      ]
     }
   ]
 }

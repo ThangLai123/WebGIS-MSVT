@@ -49,24 +49,39 @@ LOCKOUT_MINUTES = int(os.getenv("LOCKOUT_MINUTES", "15"))
 
 # Cấu hình CORS linh hoạt (Hỗ trợ cả mảng JSON và chuỗi phân cách bởi dấu phẩy)
 def get_cors_origins():
+    default_origins = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://web-gis-msvt.vercel.app"
+    ]
     origins_raw = os.getenv("CORS_ORIGINS")
     if not origins_raw or not origins_raw.strip():
-        # Fallback cho local development
-        return ["http://localhost:5173", "http://127.0.0.1:5173"]
+        return default_origins
     
     origins_raw = origins_raw.strip()
+    result = list(default_origins)
     # 1. Thử giải mã định dạng mảng JSON: ["https://fe.vercel.app"]
     try:
         parsed = json.loads(origins_raw)
         if isinstance(parsed, list):
-            return [str(o).strip() for o in parsed if str(o).strip()]
+            for o in parsed:
+                s = str(o).strip()
+                if s and s not in result:
+                    result.append(s)
+            return result
     except Exception:
         pass
     
     # 2. Thử giải mã chuỗi phân cách bởi dấu phẩy: https://fe.vercel.app,https://example.com
     if "," in origins_raw:
-        return [part.strip() for part in origins_raw.split(",") if part.strip()]
+        for part in origins_raw.split(","):
+            s = part.strip()
+            if s and s not in result:
+                result.append(s)
+        return result
         
-    return [origins_raw]
+    if origins_raw not in result:
+        result.append(origins_raw)
+    return result
 
 CORS_ORIGINS = get_cors_origins()
