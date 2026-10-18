@@ -188,3 +188,33 @@
   padding-top: 14px;
   margin-top: 4px;
 }
+
+@media (max-width: 480px) {
+  .admin-login-overlay {
+    padding: 12px;
+  }
+
+  .admin-login-modal {
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .admin-login-header {
+    padding: 16px 18px;
+  }
+
+  .admin-login-body {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .admin-login-input {
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  .admin-login-submit-btn {
+    min-height: 44px;
+    font-size: 14px;
+  }
+}

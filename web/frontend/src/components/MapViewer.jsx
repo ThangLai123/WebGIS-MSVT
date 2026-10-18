@@ -72,6 +72,39 @@ const MapViewController = ({ resetTrigger, focusFeature, defaultCenter, defaultZ
 };
 
 /**
+ * Tự động đồng bộ kích thước Leaflet khi Sidebar mở/đóng hoặc khung nhìn thay đổi
+ */
+const MapResizeHandler = ({ showMsvtPanel }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    // Gọi invalidateSize sau khi animation slide của sidebar hoàn thành
+    const timer = setTimeout(() => {
+      try {
+        map.invalidateSize({ animate: false });
+      } catch {}
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [map, showMsvtPanel]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      try {
+        map.invalidateSize({ animate: false });
+      } catch {}
+    };
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, [map]);
+
+  return null;
+};
+
+/**
  * Component MapViewer - Bản đồ WebGIS chuyên trách hiển thị Vùng trồng MSVT
  */
 const MapViewer = ({
@@ -86,7 +119,8 @@ const MapViewer = ({
   onQuickLookupCoord = () => {},
   msvtRefreshTrigger = 0,
   resetViewTrigger = 0,
-  onResetView = () => {}
+  onResetView = () => {},
+  showMsvtPanel = false
 }) => {
   // Tọa độ trung tâm vùng trồng tỉnh Nghệ An (TX Thái Hòa và các huyện phụ cận)
   const centerNgheAn = [19.25, 105.42];
@@ -129,6 +163,9 @@ const MapViewer = ({
 
         {/* Lắng nghe click tọa độ và zoom */}
         <MapEventListener onMapClick={onMapClick} onZoomChange={setCurrentZoom} />
+
+        {/* Tự động invalidateSize khi thay đổi kích thước */}
+        <MapResizeHandler showMsvtPanel={showMsvtPanel} />
 
         {/* Điều khiển View / Zoom */}
         <MapViewController

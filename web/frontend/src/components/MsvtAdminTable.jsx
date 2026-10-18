@@ -194,15 +194,16 @@ const MsvtAdminTable = ({
                         {/* Nút Xem chi tiết */}
                         <button
                           type="button"
+                          className="msvt-admin-action-btn"
                           onClick={() => onViewDetail(r)}
                           title="Xem chi tiết đầy đủ"
                           style={{
                             background: '#f1f5f9',
                             border: '1px solid #cbd5e1',
                             borderRadius: '4px',
-                            padding: '4px 6px',
+                            padding: '6px 8px',
                             cursor: 'pointer',
-                            fontSize: '12px'
+                            fontSize: '13px'
                           }}
                         >
                           👁️
@@ -212,15 +213,16 @@ const MsvtAdminTable = ({
                         {!isDeleted && (
                           <button
                             type="button"
+                            className="msvt-admin-action-btn"
                             onClick={() => onEdit(r)}
                             title="Chỉnh sửa thông tin vùng trồng"
                             style={{
                               background: '#eff6ff',
                               border: '1px solid #bfdbfe',
                               borderRadius: '4px',
-                              padding: '4px 6px',
+                              padding: '6px 8px',
                               cursor: 'pointer',
-                              fontSize: '12px'
+                              fontSize: '13px'
                             }}
                           >
                             ✏️
@@ -231,15 +233,16 @@ const MsvtAdminTable = ({
                         {!isDeleted && (
                           <button
                             type="button"
+                            className="msvt-admin-action-btn"
                             onClick={() => onDelete(r)}
                             title="Xóa mềm vùng trồng khỏi bản đồ"
                             style={{
                               background: '#fef2f2',
                               border: '1px solid #fecaca',
                               borderRadius: '4px',
-                              padding: '4px 6px',
+                              padding: '6px 8px',
                               cursor: 'pointer',
-                              fontSize: '12px'
+                              fontSize: '13px'
                             }}
                           >
                             🗑️
@@ -288,18 +291,21 @@ const MsvtAdminTable = ({
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
           <button
             type="button"
             onClick={() => onPageChange(1)}
             disabled={page <= 1 || loading}
             style={{
-              padding: '4px 10px',
+              padding: '6px 10px',
+              minHeight: '36px',
               border: '1px solid #cbd5e1',
-              borderRadius: '4px',
+              borderRadius: '6px',
               backgroundColor: '#fff',
               cursor: page <= 1 ? 'not-allowed' : 'pointer',
-              opacity: page <= 1 ? 0.5 : 1
+              opacity: page <= 1 ? 0.5 : 1,
+              fontSize: '12px',
+              fontWeight: 600
             }}
           >
             « Đầu
@@ -309,17 +315,20 @@ const MsvtAdminTable = ({
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1 || loading}
             style={{
-              padding: '4px 10px',
+              padding: '6px 10px',
+              minHeight: '36px',
               border: '1px solid #cbd5e1',
-              borderRadius: '4px',
+              borderRadius: '6px',
               backgroundColor: '#fff',
               cursor: page <= 1 ? 'not-allowed' : 'pointer',
-              opacity: page <= 1 ? 0.5 : 1
+              opacity: page <= 1 ? 0.5 : 1,
+              fontSize: '12px',
+              fontWeight: 600
             }}
           >
             ‹ Trước
           </button>
-          <span style={{ padding: '0 6px' }}>
+          <span style={{ padding: '0 6px', fontSize: '13px' }}>
             Trang <strong>{page}</strong> / <strong>{totalPages || 1}</strong>
           </span>
           <button
@@ -327,12 +336,15 @@ const MsvtAdminTable = ({
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages || loading}
             style={{
-              padding: '4px 10px',
+              padding: '6px 10px',
+              minHeight: '36px',
               border: '1px solid #cbd5e1',
-              borderRadius: '4px',
+              borderRadius: '6px',
               backgroundColor: '#fff',
               cursor: page >= totalPages ? 'not-allowed' : 'pointer',
-              opacity: page >= totalPages ? 0.5 : 1
+              opacity: page >= totalPages ? 0.5 : 1,
+              fontSize: '12px',
+              fontWeight: 600
             }}
           >
             Sau ›
@@ -342,12 +354,15 @@ const MsvtAdminTable = ({
             onClick={() => onPageChange(totalPages)}
             disabled={page >= totalPages || loading}
             style={{
-              padding: '4px 10px',
+              padding: '6px 10px',
+              minHeight: '36px',
               border: '1px solid #cbd5e1',
-              borderRadius: '4px',
+              borderRadius: '6px',
               backgroundColor: '#fff',
               cursor: page >= totalPages ? 'not-allowed' : 'pointer',
-              opacity: page >= totalPages ? 0.5 : 1
+              opacity: page >= totalPages ? 0.5 : 1,
+              fontSize: '12px',
+              fontWeight: 600
             }}
           >
             Cuối »

@@ -74,14 +74,29 @@ const FitBoundsHelper = ({ bounds, triggerKey }) => {
   return null;
 };
 
-// Tự động sửa kích thước bản đồ khi mở modal
+// Tự động sửa kích thước bản đồ khi mở modal hoặc thay đổi màn hình
 const MapResizer = () => {
   const map = useMap();
   useEffect(() => {
     const timer = setTimeout(() => {
-      map.invalidateSize();
+      try {
+        map.invalidateSize({ animate: false });
+      } catch {}
     }, 200);
-    return () => clearTimeout(timer);
+
+    const handleResize = () => {
+      try {
+        map.invalidateSize({ animate: false });
+      } catch {}
+    };
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
   }, [map]);
   return null;
 };

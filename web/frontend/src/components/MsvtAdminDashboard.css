@@ -272,8 +272,141 @@
   flex-direction: column;
 }
 
+.msvt-admin-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+/* ==============================================================================
+   RESPONSIVE ADMIN DASHBOARD
+   ============================================================================== */
 @media (max-width: 900px) {
   .msvt-dashboard-stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .msvt-dashboard-overlay {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .msvt-dashboard-container {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+
+  .msvt-dashboard-header {
+    padding: 12px 14px;
+    padding-top: max(12px, env(safe-area-inset-top, 12px));
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .msvt-dashboard-title-area {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .msvt-dashboard-title {
+    font-size: 15px;
+  }
+
+  .msvt-dashboard-header-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .msvt-dash-btn-add,
+  .msvt-dash-btn-import,
+  .msvt-dash-btn-refresh {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 12px;
+    box-sizing: border-box;
+  }
+
+  .msvt-dashboard-stats-grid {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .msvt-stat-card {
+    padding: 8px 12px;
+  }
+
+  .msvt-stat-value {
+    font-size: 18px;
+  }
+
+  .msvt-dashboard-toolbar {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .msvt-dashboard-toolbar .msvt-toolbar-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 100% !important;
+    min-height: 42px;
+    font-size: 13.5px;
+    box-sizing: border-box;
+  }
+
+  .msvt-toolbar-checkbox {
+    width: 100%;
+    margin-left: 0;
+    padding: 4px 0;
+  }
+
+  .msvt-toolbar-btn-reset {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  .msvt-dashboard-content {
+    padding: 8px 12px;
+  }
+
+  .msvt-admin-action-btn {
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 14px;
+  }
+
+  .msvt-detail-modal-overlay {
+    padding: 0;
+  }
+
+  .msvt-detail-modal-card {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .msvt-dashboard-stats-grid {
+    grid-template-columns: 1fr;
   }
 }

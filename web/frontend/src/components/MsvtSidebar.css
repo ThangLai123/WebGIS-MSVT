@@ -277,3 +277,74 @@
   align-items: center;
   gap: 8px;
 }
+
+/* ==============================================================================
+   RESPONSIVE BOTTOM SHEET / DRAWER TỐI ƯU CHO DI ĐỘNG & TABLET
+   ============================================================================== */
+@media (max-width: 768px) {
+  .msvt-panel-container {
+    border-radius: 16px 16px 0 0;
+  }
+
+  .msvt-panel-header {
+    padding: 10px 16px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .msvt-panel-header h3 {
+    font-size: 14.5px;
+  }
+
+  .msvt-close-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border-radius: 8px;
+  }
+
+  .msvt-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .msvt-tab-btn {
+    padding: 12px 6px;
+    min-height: 44px;
+    font-size: 12px;
+  }
+
+  .msvt-panel-body {
+    padding: 12px 14px;
+    gap: 14px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
+  }
+
+  .msvt-action-btn {
+    min-height: 44px;
+    font-size: 13.5px;
+  }
+
+  .msvt-form-input {
+    padding: 10px 12px;
+    font-size: 14px;
+    min-height: 42px;
+    box-sizing: border-box;
+  }
+}
+
+/* Màn hình điện thoại nhỏ (320px - 360px) */
+@media (max-width: 360px) {
+  .msvt-tab-btn {
+    font-size: 11px;
+    gap: 3px;
+    padding: 10px 4px;
+  }
+
+  .msvt-detail-title {
+    font-size: 15px;
+  }
+}

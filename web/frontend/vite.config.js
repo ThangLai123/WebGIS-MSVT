@@ -10,8 +10,9 @@ export default defineConfig({
     },
     proxy: {
       '/msvt-api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'https://web-gis-msvt-9mx3.vercel.app',
         changeOrigin: true,
+        secure: false,
         rewrite: (path) => path.replace(/^\/msvt-api/, ''),
       }
     }
@@ -19,8 +20,9 @@ export default defineConfig({
   preview: {
     proxy: {
       '/msvt-api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'https://web-gis-msvt-9mx3.vercel.app',
         changeOrigin: true,
+        secure: false,
         rewrite: (path) => path.replace(/^\/msvt-api/, ''),
       }
     }

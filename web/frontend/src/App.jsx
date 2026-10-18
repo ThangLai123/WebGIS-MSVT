@@ -166,26 +166,34 @@ function App() {
             msvtRefreshTrigger={msvtRefreshTrigger}
             resetViewTrigger={resetViewTrigger}
             onResetView={handleResetMapView}
+            showMsvtPanel={showMsvtPanel}
           />
         </div>
 
         {/* Sidebar chỉ xuất hiện khi người dùng mở Tra cứu, Bộ lọc hoặc Chi tiết */}
         {showMsvtPanel && (
-          <aside className="sidebar-section">
-            <MsvtSidebar
-              selectedRegion={selectedMsvtRegion}
-              onClearSelection={handleClearMsvtSelection}
-              onFlyToRegion={handleFlyToRegion}
-              filters={msvtFilters}
-              onFilterChange={handleMsvtFilterChange}
-              onResetFilters={handleResetMsvtFilters}
-              clickedCoord={clickedCoord}
-              stats={msvtStats}
-              onClose={() => setShowMsvtPanel(false)}
-              activeTab={msvtActiveTab}
-              setActiveTab={setMsvtActiveTab}
+          <>
+            <div
+              className="sidebar-backdrop"
+              onClick={() => setShowMsvtPanel(false)}
+              aria-hidden="true"
             />
-          </aside>
+            <aside className="sidebar-section" aria-label="Bảng điều khiển và tra cứu MSVT">
+              <MsvtSidebar
+                selectedRegion={selectedMsvtRegion}
+                onClearSelection={handleClearMsvtSelection}
+                onFlyToRegion={handleFlyToRegion}
+                filters={msvtFilters}
+                onFilterChange={handleMsvtFilterChange}
+                onResetFilters={handleResetMsvtFilters}
+                clickedCoord={clickedCoord}
+                stats={msvtStats}
+                onClose={() => setShowMsvtPanel(false)}
+                activeTab={msvtActiveTab}
+                setActiveTab={setMsvtActiveTab}
+              />
+            </aside>
+          </>
         )}
       </main>
 

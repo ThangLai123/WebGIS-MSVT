@@ -1684,6 +1684,192 @@
   box-shadow: none !important;
 }
 
+/* ==============================================================================
+   RESPONSIVE DESIGN CHO FORM THÊM / SỬA VÙNG TRỒNG MSVT
+   Hỗ trợ hoàn hảo mọi thiết bị: Mobile 320px-599px, Tablet 600px-1024px, Desktop 1025px+
+   ============================================================================== */
+@media (max-width: 768px) {
+  .msvt-form-overlay {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .msvt-form-modal,
+  .msvt-form-modal-large {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+
+  .msvt-form-header {
+    padding: 12px 16px;
+    padding-top: max(12px, env(safe-area-inset-top, 12px));
+    flex-shrink: 0;
+  }
+
+  .msvt-form-header-title {
+    font-size: 15px;
+  }
+
+  .msvt-form-close-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border-radius: 6px;
+  }
+
+  .msvt-form-body {
+    padding: 12px 14px;
+    gap: 12px;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .msvt-form-section {
+    padding: 12px 10px;
+    gap: 10px;
+    border-radius: 8px;
+  }
+
+  .msvt-form-section-title {
+    font-size: 13px;
+    padding-bottom: 6px;
+  }
+
+  .msvt-form-grid-2,
+  .msvt-form-grid-3 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .msvt-field-label {
+    font-size: 12.5px;
+  }
+
+  .msvt-field-input,
+  .msvt-field-select {
+    min-height: 42px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .msvt-coord-textarea {
+    min-height: 120px;
+    font-size: 13px;
+    line-height: 1.4;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Bản đồ xem trước trực tiếp: Thu gọn chiều cao tối ưu không gian */
+  .msvt-preview-map-box {
+    margin-top: 10px;
+  }
+
+  .msvt-preview-map-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .msvt-history-toolbar {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .msvt-history-btn {
+    flex: 1 1 auto;
+    min-height: 34px;
+    font-size: 11.5px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .msvt-leaflet-container-wrapper .leaflet-container {
+    height: 240px !important;
+  }
+
+  /* Điểm vị trí Point hiển thị gọn gàng */
+  .msvt-point-detected-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  /* Bảng kiểm định 8 tiêu chí & Bảng nhóm: Cuộn ngang mượt mà trong container */
+  .msvt-checklist-card,
+  .msvt-group-summary-table,
+  .msvt-vertices-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .msvt-checklist-table {
+    min-width: 480px;
+  }
+
+  .msvt-vertices-table {
+    min-width: 520px;
+  }
+
+  /* Footer cố định phía dưới, không che bởi bàn phím hay home indicator */
+  .msvt-form-footer {
+    padding: 10px 14px;
+    position: sticky;
+    bottom: 0;
+    background: #ffffff;
+    border-top: 1px solid #cbd5e1;
+    z-index: 50;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
+    gap: 8px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .msvt-btn-cancel,
+  .msvt-btn-submit {
+    flex: 1;
+    min-height: 44px;
+    font-size: 13.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+}
+
+/* Màn hình điện thoại rất nhỏ (320px - 360px) */
+@media (max-width: 360px) {
+  .msvt-form-header-title {
+    font-size: 14px;
+  }
+
+  .msvt-btn-cancel,
+  .msvt-btn-submit {
+    font-size: 12.5px;
+    padding: 8px 10px;
+  }
+
+  .msvt-leaflet-container-wrapper .leaflet-container {
+    height: 200px !important;
+  }
+}
+
+
 
 
 
