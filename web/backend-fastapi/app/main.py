@@ -1,3 +1,4 @@
+from typing import Any, Dict
 import logging
 from fastapi import FastAPI, Depends, Request, status
 from fastapi.responses import JSONResponse
@@ -69,20 +70,22 @@ def health_check(db: Session = Depends(get_db)):
             }
         )
 
-    diag_data = {
+    postgis_diag: Dict[str, Any] = {
+        "installed": False,
+        "version": None,
+        "schema": None,
+        "function_callable": False
+    }
+    vung_trong_diag: Dict[str, Any] = {
+        "exists": False,
+        "count": None
+    }
+    diag_data: Dict[str, Any] = {
         "connected": False,
         "database_name": None,
         "search_path": None,
-        "postgis": {
-            "installed": False,
-            "version": None,
-            "schema": None,
-            "function_callable": False
-        },
-        "vung_trong": {
-            "exists": False,
-            "count": None
-        }
+        "postgis": postgis_diag,
+        "vung_trong": vung_trong_diag
     }
 
     # BƯỚC 1: Kiểm tra kết nối cơ sở (SELECT 1, current_database)

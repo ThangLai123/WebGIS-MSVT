@@ -27,7 +27,7 @@ def clean_raw_coordinate_text(raw_text: str) -> str:
     if not raw_text:
         return ""
     
-    s = str(raw_text)
+    s = raw_text
     
     # 1. Thẻ HTML xuống dòng
     s = re.sub(r'<br\s*/?>', '\n', s, flags=re.IGNORECASE)

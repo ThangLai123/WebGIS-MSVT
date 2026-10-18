@@ -532,7 +532,7 @@ async def validate_import_job(
             continue
 
         # Nếu toàn bộ dòng trống -> bỏ qua
-        if not any(v is not None and str(v).strip() for v in raw_row_vals.values()):
+        if not any(v is not None and v.strip() for v in raw_row_vals.values()):
             continue
 
         # Nếu dòng không có bất kỳ mã MSVT, không có tên tổ chức và không có tọa độ -> dòng chú thích hoặc dòng rác
@@ -596,10 +596,10 @@ async def validate_import_job(
         # 6. Kiểm tra số hộ tham gia
         so_ho_clean = None
         raw_so_ho = raw_row_vals.get("so_ho_tham_gia")
-        if raw_so_ho is not None and str(raw_so_ho).strip():
+        if raw_so_ho is not None and raw_so_ho.strip():
             try:
                 # Ép kiểu float rồi sang int nếu là số nguyên
-                float_ho = float(str(raw_so_ho).replace(",", "."))
+                float_ho = float(raw_so_ho.replace(",", "."))
                 if float_ho < 0:
                     issues.append(f"Số hộ tham gia mang giá trị âm ({float_ho}).")
                 elif not float_ho.is_integer():
@@ -613,9 +613,9 @@ async def validate_import_job(
         # 7. Kiểm tra diện tích (ha)
         dien_tich_clean = None
         raw_dt = raw_row_vals.get("dien_tich_ha")
-        if raw_dt is not None and str(raw_dt).strip():
+        if raw_dt is not None and raw_dt.strip():
             try:
-                dt_val = float(str(raw_dt).replace(",", "."))
+                dt_val = float(raw_dt.replace(",", "."))
                 if dt_val < 0:
                     issues.append(f"Diện tích mang giá trị âm ({dt_val} ha).")
                 elif dt_val > 9999999999.9999:
@@ -628,9 +628,9 @@ async def validate_import_job(
         # 8. Kiểm tra sản lượng
         tong_sl_clean = None
         raw_tsl = raw_row_vals.get("tong_san_luong_tan")
-        if raw_tsl is not None and str(raw_tsl).strip():
+        if raw_tsl is not None and raw_tsl.strip():
             try:
-                tsl_val = float(str(raw_tsl).replace(",", "."))
+                tsl_val = float(raw_tsl.replace(",", "."))
                 if tsl_val < 0:
                     issues.append(f"Tổng sản lượng mang giá trị âm ({tsl_val} tấn).")
                 else:
@@ -640,9 +640,9 @@ async def validate_import_job(
 
         ns_clean = None
         raw_ns = raw_row_vals.get("san_luong_tan_ha")
-        if raw_ns is not None and str(raw_ns).strip():
+        if raw_ns is not None and raw_ns.strip():
             try:
-                ns_val = float(str(raw_ns).replace(",", "."))
+                ns_val = float(raw_ns.replace(",", "."))
                 if ns_val < 0:
                     issues.append(f"Năng suất mang giá trị âm ({ns_val} tấn/ha).")
                 else:
@@ -651,7 +651,7 @@ async def validate_import_job(
                 issues.append(f"Năng suất không hợp lệ: '{raw_ns}'.")
 
         # 9. Phân tích và kiểm định tọa độ GPS bằng coord_parser
-        raw_coords_str = str(val_toa_do).strip() if val_toa_do is not None else ""
+        raw_coords_str = val_toa_do.strip() if val_toa_do is not None else ""
         geom_type = "MISSING"
         area_gis_ha = None
         area_diff_pct = None
@@ -789,7 +789,7 @@ async def validate_import_job(
             "warnings": warnings,
             "selected": default_selected,
             "geojson": geojson,
-            "raw_values": {k: str(v) if v is not None else None for k, v in raw_row_vals.items()}
+            "raw_values": {k: v if v is not None else None for k, v in raw_row_vals.items()}
         }
         validated_rows.append(row_item)
 
@@ -1321,7 +1321,7 @@ def export_import_report(
         for col in sheet.columns:
             max_len = max(len(str(cell.value or '')) for cell in col)
             if col and col[0].column is not None:
-                col_letter = get_column_letter(int(col[0].column))
+                col_letter = get_column_letter(col[0].column)
                 sheet.column_dimensions[col_letter].width = min(max(max_len + 3, 12), 60)
 
     output = io.BytesIO()

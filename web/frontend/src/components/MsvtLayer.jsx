@@ -496,20 +496,6 @@ const MsvtLayer = ({
     }
   }, [selectedRegionId, geoJsonData, onSelectRegion]);
 
-  // =========================================================================
-  // ĐIỀU HƯỚNG BẢN ĐỒ KHI CÓ FOCUSFEATURE TỪ NGOÀI (SIDEBAR / TRA CỨU)
-  // =========================================================================
-  useEffect(() => {
-    if (!focusFeature || !focusFeature.geometry || !map) return;
-
-    const fid = focusFeature.properties?.id;
-    // Nếu vừa được zoom trực tiếp từ click marker, không gọi lại flyTo để tránh giật
-    if (fid && fid === lastFocusedIdRef.current) return;
-    lastFocusedIdRef.current = fid;
-
-    zoomToFeature(focusFeature);
-  }, [focusFeature, zoomToFeature, map]);
-
   if (!visible) return null;
 
   return (

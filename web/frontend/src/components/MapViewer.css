@@ -123,38 +123,203 @@
   bottom: 24px;
   left: 20px;
   z-index: 900;
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(4px);
+  background-color: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(6px);
   border: 1px solid #cbd5e1;
   border-radius: 8px;
-  padding: 6px 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 8px 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   font-size: 12.5px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
   color: #0f172a;
+  max-width: calc(100vw - 40px);
+}
+
+.map-coord-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.map-coord-title {
+  font-weight: 700;
+  color: #1e3a8a;
+  font-size: 12px;
+}
+
+.map-coord-val {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.map-coord-dms {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.map-coord-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.map-coord-btn-copy,
+.map-coord-btn-gmaps,
+.map-coord-btn-locate,
+.map-coord-btn-lookup {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.map-coord-btn-copy {
+  background-color: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+.map-coord-btn-copy:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.map-coord-btn-gmaps {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+}
+.map-coord-btn-gmaps:hover {
+  background-color: #dbeafe;
+  border-color: #3b82f6;
+}
+
+.map-coord-btn-locate {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+.map-coord-btn-locate:hover {
+  background-color: #dcfce7;
+  border-color: #22c55e;
 }
 
 .map-coord-btn-lookup {
   background-color: #15803d;
   color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  padding: 4px 10px;
-  font-size: 11.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  border: 1px solid #166534;
 }
-
 .map-coord-btn-lookup:hover {
   background-color: #166534;
 }
 
 /* ========================================================
+   CLICKED / INTERACTIVE PIN MARKER
+   ======================================================== */
+.leaflet-marker-icon.msvt-clicked-pin-marker,
+.msvt-clicked-pin-marker {
+  position: absolute !important;
+  box-sizing: border-box !important;
+  transition: none !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  z-index: 1050;
+}
+
+.msvt-clicked-pin-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.msvt-clicked-pin-icon {
+  font-size: 24px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
+  position: relative;
+  top: -4px;
+  z-index: 2;
+  user-select: none;
+}
+
+.msvt-clicked-pin-pulse {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 7px;
+  background: rgba(37, 99, 235, 0.55);
+  border-radius: 50%;
+  animation: msvtPulsePin 2s infinite ease-out;
+  z-index: 1;
+}
+
+@keyframes msvtPulsePin {
+  0% {
+    width: 6px;
+    height: 3px;
+    opacity: 0.9;
+  }
+  100% {
+    width: 32px;
+    height: 16px;
+    opacity: 0;
+  }
+}
+
+.msvt-clicked-popup-card {
+  padding: 4px;
+  font-size: 12px;
+  color: #1e293b;
+  min-width: 180px;
+}
+
+.msvt-clicked-popup-header {
+  font-weight: 700;
+  color: #1d4ed8;
+  font-size: 12.5px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 4px;
+}
+
+.msvt-clicked-popup-coords {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.msvt-clicked-popup-dms {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* ========================================================
    ONE MARKER PER MSVT: MARKER XANH LÁ ĐỒNG NHẤT
    ======================================================== */
+.leaflet-marker-icon.msvt-unified-marker,
 .msvt-unified-marker {
   display: flex !important;
   align-items: center;
@@ -162,7 +327,9 @@
   background: transparent !important;
   border: none !important;
   cursor: pointer;
-  position: relative;
+  position: absolute !important; /* Bắt buộc position: absolute theo quy chuẩn Leaflet */
+  box-sizing: border-box !important;
+  transition: none !important; /* Tuyệt đối không transition trên container marker để tránh trôi tọa độ khi zoom/pan */
 }
 
 /* Tăng vùng chạm cảm ứng cho thiết bị di động (Touch Target >= 42px) */
@@ -174,15 +341,18 @@
   right: -12px;
   bottom: -12px;
   border-radius: 50%;
+  pointer-events: auto;
 }
 
 .msvt-marker-dot {
   width: 14px;
   height: 14px;
+  box-sizing: border-box !important;
   background-color: #16a34a; /* Xanh lá tươi sáng */
   border: 2px solid #ffffff; /* Viền trắng mảnh */
   border-radius: 50%;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+  transform-origin: center center; /* Cố định tâm chấm tròn ngay tại điểm neo GPS */
   transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
               background-color 0.18s ease,
               box-shadow 0.18s ease;

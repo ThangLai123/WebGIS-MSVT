@@ -1,4 +1,5 @@
 import React from 'react';
+import './MsvtAdminTable.css';
 
 const MsvtAdminTable = ({
   regions = [],
@@ -13,23 +14,48 @@ const MsvtAdminTable = ({
   onEdit = () => {},
   onDelete = () => {}
 }) => {
+  // Render badge kiểu hình học GIS
+  const renderGeomBadge = (geomType) => {
+    if (geomType === 'MULTIPOLYGON') {
+      return (
+        <span className="msvt-mcard-badge badge-poly">
+          🟩 Đa giác
+        </span>
+      );
+    }
+    if (geomType === 'POINT') {
+      return (
+        <span className="msvt-mcard-badge badge-point">
+          🔵 Điểm mốc
+        </span>
+      );
+    }
+    return (
+      <span className="msvt-mcard-badge badge-nogeom">
+        ⚪ Chưa có GIS
+      </span>
+    );
+  };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Container Bảng cuộn ngang / dọc */}
-      <div style={{ flex: 1, overflow: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#fff' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
+    <div className="msvt-table-wrapper">
+      {/* -------------------------------------------------------------
+          1. GIAO DIỆN BẢNG DÀNH CHO DESKTOP / LAPTOP (>= 769px)
+          ------------------------------------------------------------- */}
+      <div className="msvt-desktop-table-container">
+        <table className="msvt-desktop-table">
           <thead>
-            <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #cbd5e1', color: '#475569', position: 'sticky', top: 0, zIndex: 10 }}>
-              <th style={{ padding: '10px 12px', width: '45px' }}>ID</th>
-              <th style={{ padding: '10px 12px', minWidth: '170px' }}>Mã MSVT</th>
-              <th style={{ padding: '10px 12px', minWidth: '180px' }}>Tổ chức / Cá nhân</th>
-              <th style={{ padding: '10px 12px', minWidth: '120px' }}>Cây trồng</th>
-              <th style={{ padding: '10px 12px', width: '95px', textAlign: 'right' }}>Diện tích (ha)</th>
-              <th style={{ padding: '10px 12px', width: '105px', textAlign: 'right' }}>Sản lượng (tấn)</th>
-              <th style={{ padding: '10px 12px', minWidth: '110px' }}>Thị trường</th>
-              <th style={{ padding: '10px 12px', width: '120px', textAlign: 'center' }}>Bản đồ GIS</th>
-              <th style={{ padding: '10px 12px', width: '110px', textAlign: 'center' }}>Trạng thái</th>
-              <th style={{ padding: '10px 12px', width: '130px', textAlign: 'center', position: 'sticky', right: 0, backgroundColor: '#f8fafc' }}>Thao tác</th>
+            <tr>
+              <th style={{ width: '45px' }}>ID</th>
+              <th style={{ minWidth: '170px' }}>Mã MSVT</th>
+              <th style={{ minWidth: '180px' }}>Tổ chức / Cá nhân</th>
+              <th style={{ minWidth: '120px' }}>Cây trồng</th>
+              <th style={{ width: '95px', textAlign: 'right' }}>Diện tích (ha)</th>
+              <th style={{ width: '105px', textAlign: 'right' }}>Sản lượng (tấn)</th>
+              <th style={{ minWidth: '110px' }}>Thị trường</th>
+              <th style={{ width: '120px', textAlign: 'center' }}>Bản đồ GIS</th>
+              <th style={{ width: '110px', textAlign: 'center' }}>Trạng thái</th>
+              <th style={{ width: '130px', textAlign: 'center' }} className="col-actions-sticky">Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -49,25 +75,12 @@ const MsvtAdminTable = ({
               regions.map((r) => {
                 const isDeleted = Boolean(r.is_deleted);
                 return (
-                  <tr
-                    key={r.id}
-                    style={{
-                      borderBottom: '1px solid #f1f5f9',
-                      backgroundColor: isDeleted ? '#fff1f2' : 'transparent',
-                      transition: 'background-color 0.15s'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isDeleted) e.currentTarget.style.backgroundColor = '#f8fafc';
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isDeleted) e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
+                  <tr key={r.id} className={isDeleted ? 'is-deleted' : ''}>
                     {/* ID */}
-                    <td style={{ padding: '9px 12px', fontWeight: 600, color: '#64748b' }}>#{r.id}</td>
+                    <td style={{ fontWeight: 600, color: '#64748b' }}>#{r.id}</td>
 
                     {/* Mã MSVT */}
-                    <td style={{ padding: '9px 12px' }}>
+                    <td>
                       <div style={{ fontWeight: 700, color: '#15803d', wordBreak: 'break-all' }}>
                         {r.msvt_moi || 'Chưa có mã mới'}
                       </div>
@@ -79,7 +92,7 @@ const MsvtAdminTable = ({
                     </td>
 
                     {/* Tổ chức / Đại diện */}
-                    <td style={{ padding: '9px 12px' }}>
+                    <td>
                       <div style={{ fontWeight: 600, color: '#1e293b' }}>
                         {r.to_chuc_ca_nhan || 'Chưa cập nhật'}
                       </div>
@@ -91,107 +104,50 @@ const MsvtAdminTable = ({
                     </td>
 
                     {/* Loại cây trồng */}
-                    <td style={{ padding: '9px 12px', color: '#334155' }}>
+                    <td style={{ color: '#334155' }}>
                       {r.loai_cay_trong || '-'}
                     </td>
 
                     {/* Diện tích */}
-                    <td style={{ padding: '9px 12px', textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
+                    <td style={{ textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
                       {r.dien_tich_ha !== null && r.dien_tich_ha !== undefined
                         ? Number(r.dien_tich_ha).toLocaleString('vi-VN', { maximumFractionDigits: 4 })
                         : '-'}
                     </td>
 
                     {/* Tổng sản lượng */}
-                    <td style={{ padding: '9px 12px', textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
+                    <td style={{ textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
                       {r.tong_san_luong_tan !== null && r.tong_san_luong_tan !== undefined
                         ? Number(r.tong_san_luong_tan).toLocaleString('vi-VN', { maximumFractionDigits: 2 })
                         : '-'}
                     </td>
 
                     {/* Thị trường */}
-                    <td style={{ padding: '9px 12px', color: '#475569' }}>
+                    <td style={{ color: '#475569' }}>
                       {r.thi_truong || '-'}
                     </td>
 
                     {/* Bản đồ GIS */}
-                    <td style={{ padding: '9px 12px', textAlign: 'center' }}>
-                      {r.geometry_type === 'MULTIPOLYGON' ? (
-                        <span style={{
-                          backgroundColor: '#dcfce7',
-                          color: '#166534',
-                          border: '1px solid #86efac',
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '11px',
-                          fontWeight: 600
-                        }}>
-                          🟩 Đa giác
-                        </span>
-                      ) : r.geometry_type === 'POINT' ? (
-                        <span style={{
-                          backgroundColor: '#dbeafe',
-                          color: '#1e40af',
-                          border: '1px solid #93c5fd',
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '11px',
-                          fontWeight: 600
-                        }}>
-                          🔵 Điểm mốc
-                        </span>
-                      ) : (
-                        <span style={{
-                          backgroundColor: '#f1f5f9',
-                          color: '#94a3b8',
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '11px'
-                        }}>
-                          ⚪ Chưa có
-                        </span>
-                      )}
+                    <td style={{ textAlign: 'center' }}>
+                      {renderGeomBadge(r.geometry_type)}
                     </td>
 
                     {/* Trạng thái */}
-                    <td style={{ padding: '9px 12px', textAlign: 'center' }}>
+                    <td style={{ textAlign: 'center' }}>
                       {isDeleted ? (
-                        <span style={{
-                          backgroundColor: '#fee2e2',
-                          color: '#b91c1c',
-                          border: '1px solid #fca5a5',
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '11px',
-                          fontWeight: 600
-                        }}>
+                        <span className="msvt-mcard-badge badge-deleted">
                           ❌ Đã xóa mềm
                         </span>
                       ) : (
-                        <span style={{
-                          backgroundColor: '#dcfce7',
-                          color: '#15803d',
-                          border: '1px solid #86efac',
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '11px',
-                          fontWeight: 600
-                        }}>
+                        <span className="msvt-mcard-badge badge-active">
                           ✅ Hoạt động
                         </span>
                       )}
                     </td>
 
                     {/* Thao tác */}
-                    <td style={{
-                      padding: '9px 12px',
-                      textAlign: 'center',
-                      position: 'sticky',
-                      right: 0,
-                      backgroundColor: isDeleted ? '#fff1f2' : '#ffffff'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                        {/* Nút Xem chi tiết */}
+                    <td style={{ textAlign: 'center' }} className="col-actions-sticky">
+                      <div className="msvt-table-actions-group">
                         <button
                           type="button"
                           className="msvt-admin-action-btn"
@@ -209,7 +165,6 @@ const MsvtAdminTable = ({
                           👁️
                         </button>
 
-                        {/* Nút Sửa (chỉ cho bản ghi đang hoạt động) */}
                         {!isDeleted && (
                           <button
                             type="button"
@@ -229,7 +184,6 @@ const MsvtAdminTable = ({
                           </button>
                         )}
 
-                        {/* Nút Xóa mềm (chỉ cho bản ghi đang hoạt động) */}
                         {!isDeleted && (
                           <button
                             type="button"
@@ -258,31 +212,164 @@ const MsvtAdminTable = ({
         </table>
       </div>
 
-      {/* Thanh Phân trang & Tùy chọn số bản ghi */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '12px 6px 4px 6px',
-        fontSize: '12.5px',
-        color: '#475569',
-        flexWrap: 'wrap',
-        gap: '10px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      {/* -------------------------------------------------------------
+          2. GIAO DIỆN CARD LIST DÀNH CHO MOBILE (< 769px)
+          ------------------------------------------------------------- */}
+      <div className="msvt-mobile-cards-view">
+        {loading ? (
+          <div className="msvt-mcard-state-box">
+            <span className="msvt-mcard-state-icon">⏳</span>
+            <strong>Đang tải danh sách vùng trồng...</strong>
+            <span>Vui lòng chờ trong giây lát</span>
+          </div>
+        ) : regions.length === 0 ? (
+          <div className="msvt-mcard-state-box">
+            <span className="msvt-mcard-state-icon">🔍</span>
+            <strong>Không tìm thấy vùng trồng nào</strong>
+            <span>Hãy thử tìm kiếm với từ khóa khác hoặc bấm "Đặt lại" bộ lọc.</span>
+          </div>
+        ) : (
+          regions.map((r) => {
+            const isDeleted = Boolean(r.is_deleted);
+            return (
+              <div
+                key={r.id}
+                className={`msvt-mobile-card ${isDeleted ? 'is-deleted' : ''}`}
+              >
+                {/* Header Card */}
+                <div className="msvt-mcard-header">
+                  <div className="msvt-mcard-title-box">
+                    <div className="msvt-mcard-id-row">
+                      <span className="msvt-mcard-id">#{r.id}</span>
+                      {r.msvt_cu && (
+                        <span className="msvt-mcard-msvt-cu">
+                          Mã cũ: <strong>{r.msvt_cu}</strong>
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="msvt-mcard-msvt">
+                      {r.msvt_moi || 'Chưa có mã mới'}
+                    </h4>
+                  </div>
+
+                  <div className="msvt-mcard-badges">
+                    {isDeleted ? (
+                      <span className="msvt-mcard-badge badge-deleted">
+                        ❌ Đã xóa mềm
+                      </span>
+                    ) : (
+                      <span className="msvt-mcard-badge badge-active">
+                        ✅ Hoạt động
+                      </span>
+                    )}
+                    {renderGeomBadge(r.geometry_type)}
+                  </div>
+                </div>
+
+                {/* Body Card */}
+                <div className="msvt-mcard-body">
+                  <div className="msvt-mcard-owner-box">
+                    <span className="msvt-mcard-owner-icon">🏢</span>
+                    <div className="msvt-mcard-owner-details">
+                      <span className="msvt-mcard-owner-name">
+                        {r.to_chuc_ca_nhan || 'Chưa cập nhật chủ thể'}
+                      </span>
+                      {r.nguoi_dai_dien && (
+                        <span className="msvt-mcard-owner-rep">
+                          Người đại diện: <strong>{r.nguoi_dai_dien}</strong>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="msvt-mcard-grid">
+                    <div className="msvt-mcard-grid-item">
+                      <span className="msvt-mcard-grid-lbl">🌾 Cây trồng:</span>
+                      <span className="msvt-mcard-grid-val">{r.loai_cay_trong || '-'}</span>
+                    </div>
+
+                    <div className="msvt-mcard-grid-item">
+                      <span className="msvt-mcard-grid-lbl">🌐 Thị trường:</span>
+                      <span className="msvt-mcard-grid-val">{r.thi_truong || '-'}</span>
+                    </div>
+
+                    <div className="msvt-mcard-grid-item">
+                      <span className="msvt-mcard-grid-lbl">📐 Diện tích:</span>
+                      <span className="msvt-mcard-grid-val bold-green">
+                        {r.dien_tich_ha !== null && r.dien_tich_ha !== undefined
+                          ? `${Number(r.dien_tich_ha).toLocaleString('vi-VN', { maximumFractionDigits: 4 })} ha`
+                          : '-'}
+                      </span>
+                    </div>
+
+                    <div className="msvt-mcard-grid-item">
+                      <span className="msvt-mcard-grid-lbl">⚖️ Sản lượng:</span>
+                      <span className="msvt-mcard-grid-val">
+                        {r.tong_san_luong_tan !== null && r.tong_san_luong_tan !== undefined
+                          ? `${Number(r.tong_san_luong_tan).toLocaleString('vi-VN', { maximumFractionDigits: 2 })} tấn`
+                          : '-'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hàng 3 nút hành động chuẩn cảm ứng tối thiểu 44px */}
+                <div className="msvt-mcard-actions">
+                  <button
+                    type="button"
+                    className="msvt-mcard-btn btn-view"
+                    onClick={() => onViewDetail(r)}
+                    title="Xem chi tiết đầy đủ hồ sơ vùng trồng"
+                    aria-label={`Xem chi tiết vùng trồng ${r.msvt_moi || r.id}`}
+                  >
+                    <span className="btn-icon">👁️</span>
+                    <span className="btn-text">Xem chi tiết</span>
+                  </button>
+
+                  {!isDeleted && (
+                    <button
+                      type="button"
+                      className="msvt-mcard-btn btn-edit"
+                      onClick={() => onEdit(r)}
+                      title="Chỉnh sửa thông tin vùng trồng"
+                      aria-label={`Chỉnh sửa vùng trồng ${r.msvt_moi || r.id}`}
+                    >
+                      <span className="btn-icon">✏️</span>
+                      <span className="btn-text">Chỉnh sửa</span>
+                    </button>
+                  )}
+
+                  {!isDeleted && (
+                    <button
+                      type="button"
+                      className="msvt-mcard-btn btn-delete"
+                      onClick={() => onDelete(r)}
+                      title="Xóa mềm vùng trồng khỏi bản đồ"
+                      aria-label={`Xóa vùng trồng ${r.msvt_moi || r.id}`}
+                    >
+                      <span className="btn-icon">🗑️</span>
+                      <span className="btn-text">Xóa</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* -------------------------------------------------------------
+          3. THANH PHÂN TRANG (Responsive Desktop & Mobile)
+          ------------------------------------------------------------- */}
+      <div className="msvt-pagination-bar">
+        <div className="msvt-pagination-info">
           <span>Tổng số: <strong>{total}</strong> vùng trồng</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span>Hiển thị:</span>
             <select
+              className="msvt-pagination-pagesize-select"
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              style={{
-                padding: '3px 8px',
-                borderRadius: '4px',
-                border: '1px solid #cbd5e1',
-                fontSize: '12.5px',
-                outline: 'none'
-              }}
             >
               <option value="10">10 / trang</option>
               <option value="20">20 / trang</option>
@@ -291,79 +378,43 @@ const MsvtAdminTable = ({
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div className="msvt-pagination-buttons">
           <button
             type="button"
+            className="msvt-page-btn"
             onClick={() => onPageChange(1)}
             disabled={page <= 1 || loading}
-            style={{
-              padding: '6px 10px',
-              minHeight: '36px',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              backgroundColor: '#fff',
-              cursor: page <= 1 ? 'not-allowed' : 'pointer',
-              opacity: page <= 1 ? 0.5 : 1,
-              fontSize: '12px',
-              fontWeight: 600
-            }}
+            title="Về trang đầu tiên"
           >
             « Đầu
           </button>
           <button
             type="button"
+            className="msvt-page-btn"
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1 || loading}
-            style={{
-              padding: '6px 10px',
-              minHeight: '36px',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              backgroundColor: '#fff',
-              cursor: page <= 1 ? 'not-allowed' : 'pointer',
-              opacity: page <= 1 ? 0.5 : 1,
-              fontSize: '12px',
-              fontWeight: 600
-            }}
+            title="Về trang trước"
           >
             ‹ Trước
           </button>
-          <span style={{ padding: '0 6px', fontSize: '13px' }}>
+          <span className="msvt-page-indicator">
             Trang <strong>{page}</strong> / <strong>{totalPages || 1}</strong>
           </span>
           <button
             type="button"
+            className="msvt-page-btn"
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages || loading}
-            style={{
-              padding: '6px 10px',
-              minHeight: '36px',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              backgroundColor: '#fff',
-              cursor: page >= totalPages ? 'not-allowed' : 'pointer',
-              opacity: page >= totalPages ? 0.5 : 1,
-              fontSize: '12px',
-              fontWeight: 600
-            }}
+            title="Sang trang sau"
           >
             Sau ›
           </button>
           <button
             type="button"
+            className="msvt-page-btn"
             onClick={() => onPageChange(totalPages)}
             disabled={page >= totalPages || loading}
-            style={{
-              padding: '6px 10px',
-              minHeight: '36px',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              backgroundColor: '#fff',
-              cursor: page >= totalPages ? 'not-allowed' : 'pointer',
-              opacity: page >= totalPages ? 0.5 : 1,
-              fontSize: '12px',
-              fontWeight: 600
-            }}
+            title="Đến trang cuối cùng"
           >
             Cuối »
           </button>

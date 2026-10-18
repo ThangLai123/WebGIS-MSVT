@@ -21,6 +21,9 @@ build/
 temp_imports/
 **/temp_imports/
 
+# Scratch & debug directories
+scratch/
+
 # Log files
 *.log
 logs.txt

@@ -1,0 +1,562 @@
+/* MsvtAdminTable.css - Bảng quản trị MSVT Desktop & Card List Mobile */
+
+/* ==============================================================================
+   DESKTOP TABLE VIEW (Mặc định cho màn hình >= 769px)
+   ============================================================================== */
+.msvt-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.msvt-desktop-table-container {
+  display: block;
+  flex: 1;
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  min-height: 0;
+}
+
+.msvt-desktop-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.msvt-desktop-table thead tr {
+  background-color: #f8fafc;
+  border-bottom: 2px solid #cbd5e1;
+  color: #475569;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.msvt-desktop-table th {
+  padding: 10px 12px;
+  white-space: nowrap;
+}
+
+.msvt-desktop-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.msvt-desktop-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.msvt-desktop-table tbody tr:hover:not(.is-deleted) {
+  background-color: #f8fafc;
+}
+
+.msvt-desktop-table tbody tr.is-deleted {
+  background-color: #fff1f2;
+}
+
+/* Thao tác cột cố định sticky bên phải trên Desktop */
+.msvt-desktop-table .col-actions-sticky {
+  position: sticky;
+  right: 0;
+  background-color: #f8fafc;
+  z-index: 5;
+}
+
+.msvt-desktop-table tbody tr:hover:not(.is-deleted) .col-actions-sticky {
+  background-color: #f8fafc;
+}
+
+.msvt-desktop-table tbody tr.is-deleted .col-actions-sticky {
+  background-color: #fff1f2;
+}
+
+.msvt-table-actions-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* ==============================================================================
+   MOBILE CARD LIST VIEW (Ẩn trên Desktop, hiển thị trên Mobile < 769px)
+   ============================================================================== */
+.msvt-mobile-cards-view {
+  display: none;
+}
+
+.msvt-mobile-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.msvt-mobile-card:active {
+  transform: scale(0.995);
+}
+
+.msvt-mobile-card.is-deleted {
+  background: #fff5f5;
+  border-color: #fecaca;
+}
+
+.msvt-mobile-card.is-deleted::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: #ef4444;
+}
+
+/* Header của Card */
+.msvt-mcard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+}
+
+.msvt-mcard-title-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.msvt-mcard-id-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msvt-mcard-id {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  line-height: 1;
+}
+
+.msvt-mcard-msvt {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #15803d;
+  word-break: break-all;
+  line-height: 1.3;
+}
+
+.msvt-mcard-msvt-cu {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.msvt-mcard-msvt-cu strong {
+  color: #475569;
+}
+
+.msvt-mcard-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.msvt-mcard-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.msvt-mcard-badge.badge-active {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.msvt-mcard-badge.badge-deleted {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.msvt-mcard-badge.badge-poly {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.msvt-mcard-badge.badge-point {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.msvt-mcard-badge.badge-nogeom {
+  background-color: #f8fafc;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+}
+
+/* Body của Card */
+.msvt-mcard-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msvt-mcard-owner-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background-color: #f8fafc;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.msvt-mcard-owner-icon {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.msvt-mcard-owner-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.msvt-mcard-owner-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.msvt-mcard-owner-rep {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.msvt-mcard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  background: #fafaf9;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #f5f5f4;
+}
+
+.msvt-mcard-grid-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.msvt-mcard-grid-lbl {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.msvt-mcard-grid-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.msvt-mcard-grid-val.bold-green {
+  color: #15803d;
+  font-weight: 700;
+}
+
+/* Hàng nút bấm thao tác trên Mobile: Tối ưu cảm ứng 44x44px */
+.msvt-mcard-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+}
+
+.msvt-mcard-btn {
+  flex: 1 1 calc(33.333% - 6px);
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+.msvt-mcard-btn:active {
+  transform: scale(0.97);
+}
+
+.msvt-mcard-btn.btn-view {
+  background-color: #f8fafc;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.msvt-mcard-btn.btn-view:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.msvt-mcard-btn.btn-edit {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.msvt-mcard-btn.btn-edit:hover {
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.msvt-mcard-btn.btn-delete {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.msvt-mcard-btn.btn-delete:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.msvt-mcard-btn .btn-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.msvt-mcard-btn .btn-text {
+  white-space: nowrap;
+}
+
+/* ==============================================================================
+   TRẠNG THÁI LOADING / EMPTY TRÊN MOBILE
+   ============================================================================== */
+.msvt-mcard-state-box {
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 32px 16px;
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.msvt-mcard-state-icon {
+  font-size: 28px;
+}
+
+/* ==============================================================================
+   PAGINATION (Chung cho Desktop & Tối ưu cho Mobile)
+   ============================================================================== */
+.msvt-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 6px 4px 6px;
+  font-size: 12.5px;
+  color: #475569;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.msvt-pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.msvt-pagination-pagesize-select {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 12.5px;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.msvt-pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.msvt-page-btn {
+  padding: 6px 12px;
+  min-height: 36px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.msvt-page-btn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.msvt-page-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  background-color: #f8fafc;
+}
+
+.msvt-page-indicator {
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+/* ==============================================================================
+   RESPONSIVE QUERIES
+   ============================================================================== */
+@media (max-width: 768px) {
+  /* Ẩn bảng dạng table, kích hoạt danh sách Card */
+  .msvt-desktop-table-container {
+    display: none !important;
+  }
+
+  .msvt-mobile-cards-view {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .msvt-table-wrapper {
+    height: auto;
+  }
+
+  /* Pagination trên Mobile: nút to 44px touch target */
+  .msvt-pagination-bar {
+    flex-direction: column;
+    align-items: stretch;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 12px;
+    gap: 12px;
+  }
+
+  .msvt-pagination-info {
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  .msvt-pagination-pagesize-select {
+    min-height: 40px;
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+
+  .msvt-pagination-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto 1fr 1fr;
+    gap: 6px;
+    align-items: center;
+    width: 100%;
+  }
+
+  .msvt-page-btn {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 13px;
+    padding: 8px 6px;
+  }
+
+  .msvt-page-indicator {
+    text-align: center;
+    font-size: 13px;
+    padding: 0 4px;
+  }
+}
+
+/* Màn hình điện thoại nhỏ dưới 360px */
+@media (max-width: 360px) {
+  .msvt-mcard-actions {
+    flex-direction: column;
+  }
+
+  .msvt-mcard-btn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .msvt-pagination-buttons {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .msvt-page-indicator {
+    grid-column: span 2;
+    padding: 6px 0;
+  }
+}

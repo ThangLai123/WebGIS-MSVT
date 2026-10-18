@@ -96,6 +96,7 @@ def create_dummy_excel(rows_data, sheet_name="Sheet1"):
     """Tạo tệp Excel mẫu trong bộ nhớ dạng BytesIO"""
     wb = openpyxl.Workbook()
     ws = wb.active
+    assert ws is not None
     ws.title = sheet_name
     for r_idx, row in enumerate(rows_data, 1):
         for c_idx, val in enumerate(row, 1):

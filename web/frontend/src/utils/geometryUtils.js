@@ -1988,3 +1988,113 @@ export function validateVertices(points, options = {}) {
     message: `Đa giác hợp lệ gồm ${workingPts.length} đỉnh khép kín. Diện tích thực địa ước tính: ~${areaHa.toFixed(2)} ha.`
   };
 }
+
+/**
+ * Chuyển đổi tọa độ thập phân Decimal sang định dạng Độ-Phút-Giây (DMS)
+ * Chuẩn xác đến 0.1 giây, đảm bảo:
+ * - 18.71688888888889 -> 18°43'00.8"N
+ * - 105.69600000000000 -> 105°41'45.6"E
+ * 
+ * @param {number|string} val Giá trị tọa độ thập phân
+ * @param {boolean} isLatitude true nếu là Vĩ độ (N/S), false nếu là Kinh độ (E/W)
+ * @returns {string} Chuỗi định dạng DMS
+ */
+export function decimalToDms(val, isLatitude = true) {
+  if (val === null || val === undefined || val === '') return '-';
+  const num = Number(val);
+  if (isNaN(num)) return '-';
+
+  const sign = num >= 0 ? 1 : -1;
+  const abs = Math.abs(num);
+
+  const deg = Math.floor(abs);
+  const remMin = (abs - deg) * 60;
+  const min = Math.floor(remMin);
+  const sec = (remMin - min) * 60;
+
+  let dir = isLatitude ? (sign >= 0 ? 'N' : 'S') : (sign >= 0 ? 'E' : 'W');
+
+  // Làm tròn giây đến 1 chữ số thập phân
+  const roundedSec = Number(sec.toFixed(1));
+  let finalMin = min;
+  let finalSec = roundedSec;
+  if (roundedSec >= 60) {
+    finalSec = 0;
+    finalMin += 1;
+  }
+  const secStr = finalSec.toFixed(1).padStart(4, '0');
+  const minStr = String(finalMin).padStart(2, '0');
+
+  return `${deg}°${minStr}'${secStr}"${dir}`;
+}
+
+/**
+ * Trích xuất tọa độ GPS chuẩn xác và nguồn tọa độ của một vùng trồng
+ * 
+ * @param {object} region Đối tượng vùng trồng (Feature hoặc properties)
+ * @returns {{
+ *   lat: number,
+ *   lng: number,
+ *   latDms: string,
+ *   lngDms: string,
+ *   latDecimal: string,
+ *   lngDecimal: string,
+ *   source: string,
+ *   geomType: string
+ * } | null}
+ */
+export function getRegionCoordinates(region) {
+  if (!region) return null;
+
+  let lat = null;
+  let lng = null;
+  const geomType = region.geom_type || region.geometry?.type || 'Point';
+  let source = (geomType === 'MULTIPOLYGON' || geomType === 'Polygon')
+    ? 'Điểm đại diện bề mặt Polygon (Point On Surface)'
+    : 'Tọa độ điểm mốc GPS gốc (Point)';
+
+  // 1. Kiểm tra representative_point [lng, lat] (từ ST_PointOnSurface PostGIS)
+  if (Array.isArray(region.representative_point) && region.representative_point.length >= 2) {
+    lng = Number(region.representative_point[0]);
+    lat = Number(region.representative_point[1]);
+  }
+
+  // 2. Nếu chưa có hoặc là Point, thử lấy từ geometry.coordinates
+  if ((lat === null || isNaN(lat)) && region.geometry) {
+    const geom = region.geometry;
+    if (geom.type === 'Point' && Array.isArray(geom.coordinates)) {
+      lng = Number(geom.coordinates[0]);
+      lat = Number(geom.coordinates[1]);
+      source = 'Tọa độ điểm mốc GPS gốc (Point)';
+    } else if (Array.isArray(geom.coordinates)) {
+      const coords = geom.coordinates;
+      if (geom.type === 'Polygon' && coords[0] && coords[0][0]) {
+        lng = Number(coords[0][0][0]);
+        lat = Number(coords[0][0][1]);
+        source = 'Đỉnh ranh giới Polygon (Vertex 1)';
+      }
+    }
+  }
+
+  // 3. Kiểm tra các trường lat/lng trực tiếp nếu có
+  if ((lat === null || isNaN(lat)) && (region.latitude || region.lat)) {
+    lat = Number(region.latitude || region.lat);
+    lng = Number(region.longitude || region.lng || region.lon);
+    source = 'Tọa độ khai báo bản ghi';
+  }
+
+  if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
+    return null;
+  }
+
+  return {
+    lat,
+    lng,
+    latDecimal: lat.toFixed(8),
+    lngDecimal: lng.toFixed(8),
+    latDms: decimalToDms(lat, true),
+    lngDms: decimalToDms(lng, false),
+    source,
+    geomType
+  };
+}

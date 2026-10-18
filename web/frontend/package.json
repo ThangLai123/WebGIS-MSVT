@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node tests/test_geometry_groups.js && node tests/test_coordinate_precision_and_zoom.js"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
@@ -15,6 +16,7 @@
     "react-leaflet": "^4.2.1"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.3",

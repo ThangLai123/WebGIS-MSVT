@@ -282,7 +282,7 @@ def read_and_validate_excel(excel_path):
         so_ho = None
         if so_ho_raw is not None:
             try:
-                so_ho = int(so_ho_raw)
+                so_ho = int(float(str(so_ho_raw)))
                 if so_ho < 0:
                     row_issues.append("Số hộ tham gia mang giá trị âm (<0)")
             except (ValueError, TypeError):
@@ -292,7 +292,7 @@ def read_and_validate_excel(excel_path):
         dien_tich = None
         if dien_tich_raw is not None:
             try:
-                dien_tich = float(dien_tich_raw)
+                dien_tich = float(str(dien_tich_raw))
                 if dien_tich < 0:
                     row_issues.append("Diện tích mang giá trị âm (<0)")
             except (ValueError, TypeError):
@@ -306,7 +306,7 @@ def read_and_validate_excel(excel_path):
 
         if san_luong_raw is not None:
             try:
-                san_luong_goc = float(san_luong_raw)
+                san_luong_goc = float(str(san_luong_raw))
                 if san_luong_goc < 0:
                     row_issues.append("Sản lượng mang giá trị âm (<0)")
                 else:
@@ -399,6 +399,7 @@ def export_validation_report(records, report_path):
     # SHEET 1: TỔNG QUAN KIỂM ĐỊNH
     # -------------------------------------------------------------
     ws_summary = wb.active
+    assert ws_summary is not None
     ws_summary.title = "Tổng quan kiểm định"
 
     ws_summary.merge_cells("A1:D1")
@@ -550,8 +551,10 @@ def export_validation_report(records, report_path):
     for sheet in [ws_summary, ws_details, ws_issues]:
         for col in sheet.columns:
             max_len = max(len(str(cell.value or '')) for cell in col)
-            col_letter = get_column_letter(col[0].column)
-            sheet.column_dimensions[col_letter].width = min(max(max_len + 3, 12), 40)
+            col_idx = col[0].column
+            if col_idx is not None:
+                col_letter = get_column_letter(int(col_idx))
+                sheet.column_dimensions[col_letter].width = min(max(max_len + 3, 12), 40)
 
     wb.save(report_path)
     return report_path

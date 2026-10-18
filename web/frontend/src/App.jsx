@@ -111,6 +111,19 @@ function App() {
     setMsvtActiveTab('lookup');
   };
 
+  // Phóng đến tọa độ GPS cụ thể (cho clickedCoord hoặc tọa độ nhập thủ công)
+  const handleFlyToCoord = (coord) => {
+    if (coord && coord.lat && coord.lng) {
+      setFocusFeature({
+        geometry: {
+          type: 'Point',
+          coordinates: [Number(coord.lng), Number(coord.lat)]
+        },
+        properties: { id: `gps_${Date.now()}` }
+      });
+    }
+  };
+
   // Thay đổi bộ lọc vùng trồng
   const handleMsvtFilterChange = (key, value) => {
     setMsvtFilters(prev => ({ ...prev, [key]: value }));
@@ -163,6 +176,7 @@ function App() {
             clickedCoord={clickedCoord}
             onMapClick={setClickedCoord}
             onQuickLookupCoord={handleQuickLookupCoord}
+            onFlyToCoord={handleFlyToCoord}
             msvtRefreshTrigger={msvtRefreshTrigger}
             resetViewTrigger={resetViewTrigger}
             onResetView={handleResetMapView}
@@ -183,6 +197,7 @@ function App() {
                 selectedRegion={selectedMsvtRegion}
                 onClearSelection={handleClearMsvtSelection}
                 onFlyToRegion={handleFlyToRegion}
+                onFlyToCoord={handleFlyToCoord}
                 filters={msvtFilters}
                 onFilterChange={handleMsvtFilterChange}
                 onResetFilters={handleResetMsvtFilters}

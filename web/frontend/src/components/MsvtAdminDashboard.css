@@ -91,6 +91,26 @@
   transform: translateY(-1px);
 }
 
+.msvt-dash-btn-import {
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(2, 132, 199, 0.25);
+  transition: all 0.2s;
+}
+
+.msvt-dash-btn-import:hover {
+  background-color: #0369a1;
+}
+
 .msvt-dash-btn-refresh {
   background-color: rgba(255, 255, 255, 0.15);
   color: white;
@@ -123,6 +143,32 @@
 .msvt-dash-btn-close:hover {
   opacity: 1;
   background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ==============================================================================
+   DASHBOARD BODY CONTAINER (Thống nhất luồng cuộn Desktop & Mobile)
+   ============================================================================== */
+.msvt-dashboard-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  background-color: #f8fafc;
+}
+
+/* Toast Message */
+.msvt-dashboard-toast {
+  background-color: #dcfce7;
+  color: #15803d;
+  padding: 10px 24px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-bottom: 1px solid #86efac;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 /* Stats Cards */
@@ -193,20 +239,49 @@
   flex-shrink: 0;
 }
 
+.msvt-toolbar-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 260px;
+}
+
 .msvt-toolbar-input {
-  padding: 7px 12px;
+  padding: 8px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 13.5px;
   outline: none;
-  min-width: 180px;
   background-color: #f8fafc;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
 }
 
 .msvt-toolbar-input:focus {
   border-color: #15803d;
   background-color: #ffffff;
   box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.15);
+}
+
+.msvt-toolbar-search-input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.msvt-toolbar-filter-input {
+  width: 180px;
+}
+
+.msvt-toolbar-extra-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.msvt-toolbar-mobile-filter-btn {
+  display: none;
 }
 
 .msvt-toolbar-checkbox {
@@ -218,21 +293,48 @@
   cursor: pointer;
   user-select: none;
   margin-left: auto;
+  white-space: nowrap;
 }
 
 .msvt-toolbar-btn-reset {
   background: #f1f5f9;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
-  padding: 7px 12px;
+  padding: 8px 14px;
   font-size: 12.5px;
   color: #475569;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .msvt-toolbar-btn-reset:hover {
   background-color: #e2e8f0;
+}
+
+/* Thanh tổng hợp số lượng */
+.msvt-dashboard-summary-bar {
+  padding: 8px 24px;
+  background-color: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 12.5px;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.msvt-summary-tag {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11.5px;
+  color: #1e293b;
+  font-weight: 500;
 }
 
 /* Content Area */
@@ -242,6 +344,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 /* Detail Modal */
@@ -251,12 +354,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(15, 23, 42, 0.6);
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10002;
   padding: 16px;
+  animation: fadeIn 0.15s ease-out;
 }
 
 .msvt-detail-modal-card {
@@ -265,11 +370,120 @@
   width: 100%;
   max-width: 650px;
   max-height: 85vh;
-  overflow-y: auto;
+  max-height: 85dvh;
+  overflow: hidden;
   border: 1px solid #e2e8f0;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
+}
+
+.msvt-detail-modal-header {
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+  color: white;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.msvt-detail-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.msvt-detail-modal-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.msvt-detail-modal-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.msvt-detail-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 13px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+
+.msvt-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.msvt-detail-code {
+  color: #15803d;
+  font-weight: 700;
+}
+
+.msvt-detail-highlight {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.msvt-detail-extra {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.msvt-detail-coord {
+  word-break: break-all;
+  color: #0369a1;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.msvt-detail-deleted-banner {
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.msvt-detail-modal-footer {
+  padding: 12px 20px;
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.msvt-detail-btn-close {
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #334155;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.msvt-detail-btn-close:hover {
+  background-color: #f1f5f9;
 }
 
 .msvt-admin-action-btn {
@@ -284,7 +498,7 @@
 }
 
 /* ==============================================================================
-   RESPONSIVE ADMIN DASHBOARD
+   RESPONSIVE ADMIN DASHBOARD CHO TABLET VÀ MOBILE
    ============================================================================== */
 @media (max-width: 900px) {
   .msvt-dashboard-stats-grid {
@@ -296,25 +510,37 @@
   .msvt-dashboard-overlay {
     padding: 0;
     align-items: stretch;
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
   }
 
   .msvt-dashboard-container {
     width: 100vw;
-    height: 100vh;
+    height: 100%;
     height: 100dvh;
-    max-height: 100vh;
     max-height: 100dvh;
     border-radius: 0;
     border: none;
     box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #f1f5f9;
   }
 
+  /* Header cố định ở đầu màn hình điện thoại với safe-area */
   .msvt-dashboard-header {
-    padding: 12px 14px;
-    padding-top: max(12px, env(safe-area-inset-top, 12px));
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    flex-shrink: 0;
+    padding: 10px 14px;
+    padding-top: max(10px, env(safe-area-inset-top, 10px));
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
   .msvt-dashboard-title-area {
@@ -324,89 +550,249 @@
   }
 
   .msvt-dashboard-title {
-    font-size: 15px;
+    font-size: 14.5px;
+  }
+
+  .msvt-dashboard-badge {
+    font-size: 11px;
+    padding: 2px 8px;
   }
 
   .msvt-dashboard-header-actions {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr auto auto;
     gap: 6px;
+    align-items: center;
   }
 
   .msvt-dash-btn-add,
   .msvt-dash-btn-import,
-  .msvt-dash-btn-refresh {
-    flex: 1 1 auto;
-    justify-content: center;
+  .msvt-dash-btn-refresh,
+  .msvt-dash-btn-close {
     min-height: 40px;
-    padding: 8px 10px;
     font-size: 12px;
     box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .msvt-dashboard-stats-grid {
-    padding: 10px 14px;
-    gap: 8px;
+  .msvt-dash-btn-add {
+    padding: 6px 10px;
+    font-size: 12px;
   }
 
-  .msvt-stat-card {
-    padding: 8px 12px;
+  .msvt-dash-btn-import {
+    padding: 6px 8px;
+    font-size: 11.5px;
+    white-space: nowrap;
   }
 
-  .msvt-stat-value {
+  .msvt-dash-btn-refresh {
+    padding: 6px 10px;
+  }
+
+  .msvt-dash-btn-close {
+    padding: 6px 10px;
     font-size: 18px;
   }
 
+  /* BẮT BUỘC CUỘN DỌC MƯỢT MÀ: Khung thân cuộn duy nhất, không bị kẹt */
+  .msvt-dashboard-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-bottom: max(32px, env(safe-area-inset-bottom, 32px));
+  }
+
+  /* Stats trên Mobile: Grid 2x2 gọn gàng, ẩn subtext dài dòng */
+  .msvt-dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 8px 12px;
+    gap: 6px;
+    background-color: #ffffff;
+  }
+
+  .msvt-stat-card {
+    padding: 6px 10px;
+    gap: 2px;
+    border-radius: 8px;
+  }
+
+  .msvt-stat-label {
+    font-size: 10px;
+  }
+
+  .msvt-stat-value {
+    font-size: 15px;
+  }
+
+  .msvt-stat-sub {
+    display: none; /* Tiết kiệm tối đa chiều cao trên màn hình iPhone */
+  }
+
+  /* Toolbar trên Mobile: Input tìm kiếm 16px chống iOS auto-zoom */
   .msvt-dashboard-toolbar {
-    padding: 10px 14px;
+    padding: 8px 12px;
+    flex-direction: column;
+    align-items: stretch;
     gap: 8px;
   }
 
-  .msvt-dashboard-toolbar .msvt-toolbar-input {
+  .msvt-toolbar-search-row {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .msvt-toolbar-search-input {
     width: 100% !important;
-    min-width: 0 !important;
-    flex: 1 1 100% !important;
-    min-height: 42px;
-    font-size: 13.5px;
+    min-height: 44px;
+    font-size: 16px !important; /* Ngăn iOS Safari tự phóng to màn hình */
+    border-radius: 8px;
+  }
+
+  .msvt-toolbar-mobile-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 44px;
+    min-width: 74px;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
     box-sizing: border-box;
+  }
+
+  .msvt-toolbar-mobile-filter-btn.has-filter {
+    background-color: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+  }
+
+  .msvt-filter-dot {
+    color: #15803d;
+    font-size: 10px;
+  }
+
+  .msvt-toolbar-extra-filters {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    padding-top: 6px;
+    border-top: 1px dashed #e2e8f0;
+  }
+
+  .msvt-toolbar-extra-filters.is-open {
+    display: flex;
+  }
+
+  .msvt-toolbar-filter-input {
+    width: 100% !important;
+    min-height: 44px;
+    font-size: 16px !important;
+    border-radius: 8px;
+  }
+
+  .msvt-toolbar-btn-reset {
+    width: 100%;
+    min-height: 44px;
+    font-size: 13.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .msvt-toolbar-checkbox {
     width: 100%;
     margin-left: 0;
-    padding: 4px 0;
+    padding: 8px 2px;
+    font-size: 13px;
   }
 
-  .msvt-toolbar-btn-reset {
-    width: 100%;
-    min-height: 40px;
+  .msvt-toolbar-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
   }
 
+  .msvt-dashboard-summary-bar {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  /* Content chứa danh sách Cards trên Mobile: Cho phép cuộn tự nhiên */
   .msvt-dashboard-content {
-    padding: 8px 12px;
+    flex: initial;
+    overflow: visible;
+    padding: 10px 12px;
+    min-height: 0;
+    height: auto;
   }
 
-  .msvt-admin-action-btn {
-    min-width: 36px;
-    min-height: 36px;
-    font-size: 14px;
-  }
-
+  /* Modal Chi tiết trên Mobile: Kích thước toàn màn hình */
   .msvt-detail-modal-overlay {
     padding: 0;
+    align-items: stretch;
   }
 
   .msvt-detail-modal-card {
     width: 100vw;
-    height: 100vh;
+    height: 100%;
     height: 100dvh;
-    max-height: 100vh;
     max-height: 100dvh;
     border-radius: 0;
+    border: none;
+  }
+
+  .msvt-detail-modal-header {
+    padding: 12px 14px;
+    padding-top: max(12px, env(safe-area-inset-top, 12px));
+  }
+
+  .msvt-detail-modal-body {
+    padding: 14px;
+  }
+
+  .msvt-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .msvt-detail-modal-footer {
+    padding: 10px 14px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
+  }
+
+  .msvt-detail-btn-close {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
-@media (max-width: 480px) {
-  .msvt-dashboard-stats-grid {
-    grid-template-columns: 1fr;
+/* Màn hình rất hẹp <= 360px */
+@media (max-width: 360px) {
+  .msvt-dashboard-header-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .msvt-dash-btn-refresh,
+  .msvt-dash-btn-close {
+    grid-column: span 1;
   }
 }

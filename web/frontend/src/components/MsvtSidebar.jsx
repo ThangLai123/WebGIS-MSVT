@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import msvtApi from '../services/msvtApi';
+import { getRegionCoordinates, decimalToDms } from '../utils/geometryUtils';
 import './MsvtSidebar.css';
 
 /**
@@ -9,6 +10,7 @@ const MsvtSidebar = ({
   selectedRegion = null,
   onClearSelection = () => {},
   onFlyToRegion = () => {},
+  onFlyToCoord = () => {},
   filters = { msvt: '', loaiCay: '', thiTruong: '' },
   onFilterChange = () => {},
   onResetFilters = () => {},
@@ -18,6 +20,18 @@ const MsvtSidebar = ({
   activeTab = 'detail',
   setActiveTab = () => {}
 }) => {
+  // Trạng thái sao chép tọa độ
+  const [copiedCoord, setCopiedCoord] = useState(false);
+
+  const handleCopyCoord = (coordText) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(coordText).then(() => {
+        setCopiedCoord(true);
+        setTimeout(() => setCopiedCoord(false), 2200);
+      }).catch(() => {});
+    }
+  };
+
   // Trạng thái tra cứu tọa độ
   const [lookupLat, setLookupLat] = useState('');
   const [lookupLng, setLookupLng] = useState('');
@@ -246,6 +260,81 @@ const MsvtSidebar = ({
                   </li>
                 </ul>
 
+                {/* ========================================================
+                    KHU VỰC XÁC MINH TỌA ĐỘ GPS CHÍNH XÁC (SECTION 10)
+                    ======================================================== */}
+                {(() => {
+                  const coords = getRegionCoordinates(selectedRegion);
+                  if (!coords) return null;
+                  return (
+                    <div className="msvt-gps-card">
+                      <div className="msvt-gps-card-header">
+                        <span className="msvt-gps-card-title">📍 TỌA ĐỘ GPS CHÍNH XÁC (WGS84)</span>
+                        <span className="msvt-gps-type-tag">{coords.geomType}</span>
+                      </div>
+
+                      <div className="msvt-gps-grid">
+                        <div className="msvt-gps-row">
+                          <span className="msvt-gps-label">Vĩ độ (Lat):</span>
+                          <div className="msvt-gps-values">
+                            <span className="msvt-gps-dec">{coords.latDecimal}</span>
+                            <span className="msvt-gps-dms">{coords.latDms}</span>
+                          </div>
+                        </div>
+
+                        <div className="msvt-gps-row">
+                          <span className="msvt-gps-label">Kinh độ (Lng):</span>
+                          <div className="msvt-gps-values">
+                            <span className="msvt-gps-dec">{coords.lngDecimal}</span>
+                            <span className="msvt-gps-dms">{coords.lngDms}</span>
+                          </div>
+                        </div>
+
+                        <div className="msvt-gps-row">
+                          <span className="msvt-gps-label">Nguồn tọa độ:</span>
+                          <span className="msvt-gps-source">{coords.source}</span>
+                        </div>
+                      </div>
+
+                      <div className="msvt-gps-actions">
+                        <button
+                          type="button"
+                          className="msvt-gps-btn btn-copy"
+                          onClick={() => handleCopyCoord(`${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`)}
+                          title="Sao chép cặp tọa độ Decimal vào bộ nhớ tạm"
+                        >
+                          <span>{copiedCoord ? '✅ Đã sao chép!' : '📋 Sao chép tọa độ'}</span>
+                        </button>
+
+                        <a
+                          href={`https://www.google.com/maps?q=${coords.lat},${coords.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="msvt-gps-btn btn-gmaps"
+                          title="Mở chính xác tọa độ GPS này trên Google Maps"
+                        >
+                          <span>🗺️ Đối chiếu Google Maps</span>
+                        </a>
+
+                        <button
+                          type="button"
+                          className="msvt-gps-btn btn-locate"
+                          onClick={() => {
+                            if (onFlyToCoord) {
+                              onFlyToCoord({ lat: coords.lat, lng: coords.lng });
+                            } else {
+                              onFlyToRegion(selectedRegion);
+                            }
+                          }}
+                          title="Phóng nhanh đến tọa độ này trên bản đồ WebGIS"
+                        >
+                          <span>📍 Phóng đến điểm GPS</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Nút điều hướng bản đồ */}
                 <button 
                   className="msvt-action-btn msvt-action-btn-primary"
@@ -274,26 +363,74 @@ const MsvtSidebar = ({
 
             {/* Thông báo tọa độ vừa click trên bản đồ */}
             {clickedCoord && (
-              <div style={{
-                background: '#f8fafc',
-                border: '1px dashed #cbd5e1',
-                padding: '8px 10px',
-                borderRadius: '6px',
-                fontSize: '12px'
-              }}>
-                <div style={{ color: '#475569', marginBottom: '4px' }}>
-                  📍 <strong>Điểm vừa click trên bản đồ:</strong>
+              <div className="msvt-gps-card" style={{ marginTop: 0, marginBottom: '4px' }}>
+                <div className="msvt-gps-card-header">
+                  <span className="msvt-gps-card-title">📍 TỌA ĐỘ VỪA CHỌN</span>
+                  <span className="msvt-gps-type-tag" style={{ background: '#dbeafe', color: '#1d4ed8' }}>
+                    Click Bản đồ
+                  </span>
                 </div>
-                <div style={{ fontFamily: 'monospace', color: '#0f172a', fontWeight: 'bold' }}>
-                  Lat: {clickedCoord.lat}, Lng: {clickedCoord.lng}
+
+                <div className="msvt-gps-grid">
+                  <div className="msvt-gps-row">
+                    <span className="msvt-gps-label">Vĩ độ (Lat):</span>
+                    <div className="msvt-gps-values">
+                      <span className="msvt-gps-dec">{clickedCoord.lat}</span>
+                      <span className="msvt-gps-dms">{decimalToDms(clickedCoord.lat, true)}</span>
+                    </div>
+                  </div>
+
+                  <div className="msvt-gps-row">
+                    <span className="msvt-gps-label">Kinh độ (Lng):</span>
+                    <div className="msvt-gps-values">
+                      <span className="msvt-gps-dec">{clickedCoord.lng}</span>
+                      <span className="msvt-gps-dms">{decimalToDms(clickedCoord.lng, false)}</span>
+                    </div>
+                  </div>
+
+                  <div className="msvt-gps-row">
+                    <span className="msvt-gps-label">Nguồn tọa độ:</span>
+                    <span className="msvt-gps-source">Tọa độ tương tác chọn trên bản đồ</span>
+                  </div>
                 </div>
+
+                <div className="msvt-gps-actions">
+                  <button
+                    type="button"
+                    className="msvt-gps-btn btn-copy"
+                    onClick={() => handleCopyCoord(`${clickedCoord.lat}, ${clickedCoord.lng}`)}
+                    title="Sao chép cặp tọa độ vào bộ nhớ tạm"
+                  >
+                    <span>{copiedCoord ? '✅ Đã sao chép!' : '📋 Sao chép tọa độ'}</span>
+                  </button>
+
+                  <a
+                    href={`https://www.google.com/maps?q=${clickedCoord.lat},${clickedCoord.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="msvt-gps-btn btn-gmaps"
+                    title="Mở chính xác tọa độ GPS này trên Google Maps"
+                  >
+                    <span>🗺️ Đối chiếu Google Maps</span>
+                  </a>
+
+                  <button
+                    type="button"
+                    className="msvt-gps-btn btn-locate"
+                    onClick={() => onFlyToCoord && onFlyToCoord(clickedCoord)}
+                    title="Phóng nhanh đến tọa độ này trên bản đồ WebGIS"
+                  >
+                    <span>📍 Phóng đến điểm GPS</span>
+                  </button>
+                </div>
+
                 <button
                   type="button"
                   className="msvt-action-btn msvt-action-btn-secondary"
-                  style={{ marginTop: '6px', width: '100%', fontSize: '11.5px', padding: '5px' }}
+                  style={{ marginTop: '8px', width: '100%', fontSize: '11.5px', padding: '6px' }}
                   onClick={handleUseClickedCoord}
                 >
-                  ⬇️ Điền tọa độ này vào ô bên dưới
+                  ⬇️ Điền tọa độ này vào ô tra cứu bên dưới
                 </button>
               </div>
             )}

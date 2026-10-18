@@ -348,3 +348,160 @@
     font-size: 15px;
   }
 }
+
+/* ========================================================
+   KHU VỰC: TỌA ĐỘ GPS CHÍNH XÁC (GPS VERIFICATION CARD)
+   ======================================================== */
+.msvt-gps-card {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 2px 6px rgba(22, 101, 52, 0.06);
+}
+
+.msvt-gps-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border-bottom: 1px dashed #bbf7d0;
+  padding-bottom: 6px;
+}
+
+.msvt-gps-card-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #166534;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.msvt-gps-type-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+  text-transform: uppercase;
+}
+
+.msvt-gps-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.msvt-gps-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.msvt-gps-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.msvt-gps-values {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.msvt-gps-dec {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  color: #15803d;
+  font-size: 12.5px;
+}
+
+.msvt-gps-dms {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11.5px;
+  color: #374151;
+  background: #ffffff;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.msvt-gps-source {
+  font-size: 11px;
+  color: #047857;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.msvt-gps-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.msvt-gps-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 10px;
+  min-height: 38px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+}
+
+.msvt-gps-btn.btn-copy {
+  background-color: #ffffff;
+  color: #15803d;
+  border-color: #86efac;
+}
+
+.msvt-gps-btn.btn-copy:hover {
+  background-color: #f0fdf4;
+  border-color: #22c55e;
+}
+
+.msvt-gps-btn.btn-gmaps {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.msvt-gps-btn.btn-gmaps:hover {
+  background-color: #dbeafe;
+  border-color: #60a5fa;
+}
+
+.msvt-gps-btn.btn-locate {
+  background-color: #15803d;
+  color: #ffffff;
+}
+
+.msvt-gps-btn.btn-locate:hover {
+  background-color: #166534;
+}
+
+@media (max-width: 768px) {
+  .msvt-gps-actions {
+    grid-template-columns: 1fr;
+  }
+  .msvt-gps-btn {
+    min-height: 44px;
+    font-size: 12.5px;
+  }
+}

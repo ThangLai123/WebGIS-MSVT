@@ -13,4 +13,4 @@ project-excludes = [
 ]
 
 python-interpreter-path = "backend-fastapi/.venv/Scripts/python.exe"
-search-path = ["backend-fastapi"]
+search-path = ["backend-fastapi", "database"]

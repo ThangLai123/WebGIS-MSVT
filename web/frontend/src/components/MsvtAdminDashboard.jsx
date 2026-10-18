@@ -29,6 +29,7 @@ const MsvtAdminDashboard = ({
   const [filterLoaiCay, setFilterLoaiCay] = useState('');
   const [filterThiTruong, setFilterThiTruong] = useState('');
   const [includeDeleted, setIncludeDeleted] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Thống kê Dashboard
   const [dashboardStats, setDashboardStats] = useState({
@@ -247,135 +248,147 @@ const MsvtAdminDashboard = ({
           </div>
         </div>
 
-        {/* Thông báo Toast */}
-        {toastMessage && (
-          <div style={{
-            backgroundColor: '#dcfce7',
-            color: '#15803d',
-            padding: '10px 24px',
-            fontSize: '13.5px',
-            fontWeight: '600',
-            borderBottom: '1px solid #86efac',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span>✅</span>
-            <span>{toastMessage}</span>
+        {/* Khung thân Dashboard cuộn mượt mà trên Mobile & cố định trên Desktop */}
+        <div className="msvt-dashboard-body">
+          {/* Thông báo Toast */}
+          {toastMessage && (
+            <div className="msvt-dashboard-toast">
+              <span>✅</span>
+              <span>{toastMessage}</span>
+            </div>
+          )}
+
+          {/* Stats Cards */}
+          <div className="msvt-dashboard-stats-grid">
+            <div className="msvt-stat-card green">
+              <span className="msvt-stat-label">Tổng vùng trồng hoạt động</span>
+              <span className="msvt-stat-value">{dashboardStats.totalRegions}</span>
+              <span className="msvt-stat-sub">Đang hiển thị trên bản đồ WebGIS</span>
+            </div>
+
+            <div className="msvt-stat-card blue">
+              <span className="msvt-stat-label">Tổng diện tích canh tác</span>
+              <span className="msvt-stat-value">
+                {Number(dashboardStats.totalAreaHa).toLocaleString('vi-VN', { maximumFractionDigits: 2 })} ha
+              </span>
+              <span className="msvt-stat-sub">Diện tích hợp pháp được cấp mã</span>
+            </div>
+
+            <div className="msvt-stat-card amber">
+              <span className="msvt-stat-label">Tổng sản lượng ghi nhận</span>
+              <span className="msvt-stat-value">
+                {Number(dashboardStats.totalYieldTons).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} tấn
+              </span>
+              <span className="msvt-stat-sub">Lưu trữ từ CSDL nguồn</span>
+            </div>
+
+            <div className="msvt-stat-card purple">
+              <span className="msvt-stat-label">Đối tượng không gian GIS</span>
+              <span className="msvt-stat-value">
+                {dashboardStats.polyCount + dashboardStats.pointCount} <small style={{ fontSize: '13px', fontWeight: 500 }}>/ {dashboardStats.totalRegions}</small>
+              </span>
+              <span className="msvt-stat-sub">
+                🟩 {dashboardStats.polyCount} đa giác • 🔵 {dashboardStats.pointCount} điểm mốc
+              </span>
+            </div>
           </div>
-        )}
 
-        {/* Stats Cards */}
-        <div className="msvt-dashboard-stats-grid">
-          <div className="msvt-stat-card green">
-            <span className="msvt-stat-label">Tổng vùng trồng hoạt động</span>
-            <span className="msvt-stat-value">{dashboardStats.totalRegions}</span>
-            <span className="msvt-stat-sub">Đang hiển thị trên bản đồ WebGIS</span>
+          {/* Toolbar: Tìm kiếm & Lọc (Responsive Mobile) */}
+          <div className="msvt-dashboard-toolbar">
+            <div className="msvt-toolbar-search-row">
+              <input
+                type="text"
+                className="msvt-toolbar-input msvt-toolbar-search-input"
+                placeholder="🔍 Tìm mã MSVT, tổ chức, người đại diện..."
+                value={searchMsvt}
+                onChange={(e) => setSearchMsvt(e.target.value)}
+              />
+              <button
+                type="button"
+                className={`msvt-toolbar-mobile-filter-btn ${Boolean(filterLoaiCay || filterThiTruong || includeDeleted) ? 'has-filter' : ''}`}
+                onClick={() => setShowMobileFilters(!showMobileFilters)}
+                title="Mở bộ lọc nâng cao"
+              >
+                <span>⚙️ Lọc</span>
+                {Boolean(filterLoaiCay || filterThiTruong || includeDeleted) && <span className="msvt-filter-dot">●</span>}
+              </button>
+            </div>
+
+            <div className={`msvt-toolbar-extra-filters ${showMobileFilters ? 'is-open' : ''}`}>
+              <input
+                type="text"
+                className="msvt-toolbar-input msvt-toolbar-filter-input"
+                placeholder="🌾 Lọc cây trồng (Lúa, Cam...)"
+                value={filterLoaiCay}
+                onChange={(e) => setFilterLoaiCay(e.target.value)}
+              />
+
+              <input
+                type="text"
+                className="msvt-toolbar-input msvt-toolbar-filter-input"
+                placeholder="🌐 Lọc thị trường..."
+                value={filterThiTruong}
+                onChange={(e) => setFilterThiTruong(e.target.value)}
+              />
+
+              <button
+                type="button"
+                className="msvt-toolbar-btn-reset"
+                onClick={handleResetFilters}
+                title="Xóa toàn bộ bộ lọc"
+              >
+                Đặt lại
+              </button>
+
+              <label className="msvt-toolbar-checkbox">
+                <input
+                  type="checkbox"
+                  checked={includeDeleted}
+                  onChange={(e) => setIncludeDeleted(e.target.checked)}
+                />
+                <span>Xem cả bản ghi đã xóa mềm</span>
+              </label>
+            </div>
           </div>
 
-          <div className="msvt-stat-card blue">
-            <span className="msvt-stat-label">Tổng diện tích canh tác</span>
-            <span className="msvt-stat-value">
-              {Number(dashboardStats.totalAreaHa).toLocaleString('vi-VN', { maximumFractionDigits: 2 })} ha
-            </span>
-            <span className="msvt-stat-sub">Diện tích hợp pháp được cấp mã</span>
+          {/* Thanh tổng kết số lượng & bộ lọc đang kích hoạt */}
+          <div className="msvt-dashboard-summary-bar">
+            <span>📋 Danh sách: <strong>{total}</strong> vùng trồng</span>
+            {searchMsvt && <span className="msvt-summary-tag">🔍 "{searchMsvt}"</span>}
+            {filterLoaiCay && <span className="msvt-summary-tag">🌾 "{filterLoaiCay}"</span>}
+            {filterThiTruong && <span className="msvt-summary-tag">🌐 "{filterThiTruong}"</span>}
+            {includeDeleted && <span className="msvt-summary-tag" style={{ color: '#b91c1c' }}>⚠️ Gồm đã xóa mềm</span>}
           </div>
 
-          <div className="msvt-stat-card amber">
-            <span className="msvt-stat-label">Tổng sản lượng ghi nhận</span>
-            <span className="msvt-stat-value">
-              {Number(dashboardStats.totalYieldTons).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} tấn
-            </span>
-            <span className="msvt-stat-sub">Lưu trữ từ CSDL nguồn</span>
-          </div>
+          {/* Lỗi nếu có */}
+          {errorMessage && (
+            <div style={{
+              backgroundColor: '#fef2f2',
+              color: '#991b1b',
+              padding: '10px 24px',
+              fontSize: '13px',
+              borderBottom: '1px solid #fecaca'
+            }}>
+              ⚠️ {errorMessage}
+            </div>
+          )}
 
-          <div className="msvt-stat-card purple">
-            <span className="msvt-stat-label">Đối tượng không gian GIS</span>
-            <span className="msvt-stat-value">
-              {dashboardStats.polyCount + dashboardStats.pointCount} <small style={{ fontSize: '13px', fontWeight: 500 }}>/ {dashboardStats.totalRegions}</small>
-            </span>
-            <span className="msvt-stat-sub">
-              🟩 {dashboardStats.polyCount} đa giác • 🔵 {dashboardStats.pointCount} điểm mốc
-            </span>
-          </div>
-        </div>
-
-        {/* Toolbar: Tìm kiếm & Lọc */}
-        <div className="msvt-dashboard-toolbar">
-          <input
-            type="text"
-            className="msvt-toolbar-input"
-            placeholder="🔍 Tìm mã MSVT, tổ chức, người đại diện..."
-            value={searchMsvt}
-            onChange={(e) => setSearchMsvt(e.target.value)}
-            style={{ width: '280px' }}
-          />
-
-          <input
-            type="text"
-            className="msvt-toolbar-input"
-            placeholder="🌾 Lọc cây trồng (Lúa, Cam...)"
-            value={filterLoaiCay}
-            onChange={(e) => setFilterLoaiCay(e.target.value)}
-            style={{ width: '180px' }}
-          />
-
-          <input
-            type="text"
-            className="msvt-toolbar-input"
-            placeholder="🌐 Lọc thị trường..."
-            value={filterThiTruong}
-            onChange={(e) => setFilterThiTruong(e.target.value)}
-            style={{ width: '160px' }}
-          />
-
-          <button
-            type="button"
-            className="msvt-toolbar-btn-reset"
-            onClick={handleResetFilters}
-            title="Xóa toàn bộ bộ lọc"
-          >
-            Đặt lại
-          </button>
-
-          <label className="msvt-toolbar-checkbox">
-            <input
-              type="checkbox"
-              checked={includeDeleted}
-              onChange={(e) => setIncludeDeleted(e.target.checked)}
+          {/* Content Bảng dữ liệu / Card List */}
+          <div className="msvt-dashboard-content">
+            <MsvtAdminTable
+              regions={regions}
+              loading={loading}
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              onViewDetail={handleViewDetail}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
-            <span>Xem cả bản ghi đã xóa mềm</span>
-          </label>
-        </div>
-
-        {/* Lỗi nếu có */}
-        {errorMessage && (
-          <div style={{
-            backgroundColor: '#fef2f2',
-            color: '#991b1b',
-            padding: '10px 24px',
-            fontSize: '13px',
-            borderBottom: '1px solid #fecaca'
-          }}>
-            ⚠️ {errorMessage}
           </div>
-        )}
-
-        {/* Content Bảng dữ liệu */}
-        <div className="msvt-dashboard-content">
-          <MsvtAdminTable
-            regions={regions}
-            loading={loading}
-            page={page}
-            totalPages={totalPages}
-            total={total}
-            pageSize={pageSize}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            onViewDetail={handleViewDetail}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
         </div>
       </div>
 
@@ -406,58 +419,45 @@ const MsvtAdminDashboard = ({
       {isDetailOpen && selectedForDetail && (
         <div className="msvt-detail-modal-overlay" onClick={() => setIsDetailOpen(false)}>
           <div className="msvt-detail-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div style={{
-              background: 'linear-gradient(135deg, #15803d 0%, #166534 100%)',
-              color: 'white',
-              padding: '14px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
+            <div className="msvt-detail-modal-header">
+              <h3 className="msvt-detail-modal-title">
                 📋 Chi tiết Vùng trồng #{selectedForDetail.id}
               </h3>
               <button
                 type="button"
+                className="msvt-detail-modal-close-btn"
                 onClick={() => setIsDetailOpen(false)}
-                style={{ background: 'none', border: 'none', color: 'white', fontSize: '18px', cursor: 'pointer' }}
+                title="Đóng cửa sổ chi tiết"
               >
                 ✕
               </button>
             </div>
 
-            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div><strong>Mã MSVT mới:</strong> <span style={{ color: '#15803d', fontWeight: 700 }}>{selectedForDetail.msvt_moi || 'Chưa có'}</span></div>
+            <div className="msvt-detail-modal-body">
+              <div className="msvt-detail-grid">
+                <div><strong>Mã MSVT mới:</strong> <span className="msvt-detail-code">{selectedForDetail.msvt_moi || 'Chưa có'}</span></div>
                 <div><strong>Mã MSVT cũ:</strong> {selectedForDetail.msvt_cu || 'Chưa có'}</div>
-                <div><strong>Tổ chức / Cá nhân:</strong> {selectedForDetail.to_chuc_ca_nhan || 'N/A'}</div>
+                <div><strong>Tổ chức / Cá nhân:</strong> <strong>{selectedForDetail.to_chuc_ca_nhan || 'N/A'}</strong></div>
                 <div><strong>Người đại diện:</strong> {selectedForDetail.nguoi_dai_dien || 'N/A'}</div>
                 <div><strong>Số điện thoại:</strong> {selectedForDetail.so_dien_thoai || 'Chưa có'}</div>
                 <div><strong>Email:</strong> {selectedForDetail.email || 'Chưa có'}</div>
-                <div><strong>Cây trồng:</strong> {selectedForDetail.loai_cay_trong || 'N/A'}</div>
+                <div><strong>Cây trồng:</strong> <span className="msvt-detail-highlight">{selectedForDetail.loai_cay_trong || 'N/A'}</span></div>
                 <div><strong>Thị trường:</strong> {selectedForDetail.thi_truong || 'N/A'}</div>
-                <div><strong>Diện tích:</strong> {selectedForDetail.dien_tich_ha ?? 'N/A'} ha</div>
-                <div><strong>Tổng sản lượng:</strong> {selectedForDetail.tong_san_luong_tan ?? 'N/A'} tấn</div>
-                <div><strong>Năng suất:</strong> {selectedForDetail.san_luong_tan_ha ?? 'Chưa xác minh'} tấn/ha</div>
-                <div><strong>Số hộ:</strong> {selectedForDetail.so_ho_tham_gia ?? 'N/A'}</div>
+                <div><strong>Diện tích:</strong> <strong>{selectedForDetail.dien_tich_ha !== null && selectedForDetail.dien_tich_ha !== undefined ? Number(selectedForDetail.dien_tich_ha).toLocaleString('vi-VN') + ' ha' : 'N/A'}</strong></div>
+                <div><strong>Tổng sản lượng:</strong> {selectedForDetail.tong_san_luong_tan !== null && selectedForDetail.tong_san_luong_tan !== undefined ? Number(selectedForDetail.tong_san_luong_tan).toLocaleString('vi-VN') + ' tấn' : 'N/A'}</div>
+                <div><strong>Năng suất:</strong> {selectedForDetail.san_luong_tan_ha !== null && selectedForDetail.san_luong_tan_ha !== undefined ? `${selectedForDetail.san_luong_tan_ha} tấn/ha` : 'Chưa xác minh'}</div>
+                <div><strong>Số hộ tham gia:</strong> {selectedForDetail.so_ho_tham_gia ?? 'N/A'}</div>
               </div>
 
-              <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+              <div className="msvt-detail-extra">
                 <div><strong>Địa chỉ:</strong> {selectedForDetail.dia_chi_msvt || 'Chưa có'}</div>
-                <div style={{ marginTop: '6px' }}><strong>Quy trình:</strong> {selectedForDetail.quy_trinh || 'Chưa có'}</div>
-                <div style={{ marginTop: '6px' }}><strong>Tọa độ gốc:</strong> {selectedForDetail.toa_do_goc || 'Chưa có'}</div>
-                <div style={{ marginTop: '6px' }}><strong>Kiểu GIS:</strong> {selectedForDetail.geometry_type || 'Chưa có hình học'}</div>
+                <div><strong>Quy trình kỹ thuật:</strong> {selectedForDetail.quy_trinh || 'Chưa có'}</div>
+                <div><strong>Tọa độ gốc:</strong> <span className="msvt-detail-coord">{selectedForDetail.toa_do_goc || 'Chưa có'}</span></div>
+                <div><strong>Kiểu đối tượng GIS:</strong> {selectedForDetail.geometry_type || 'Chưa có hình học'}</div>
               </div>
 
               {selectedForDetail.is_deleted && (
-                <div style={{
-                  backgroundColor: '#fee2e2',
-                  border: '1px solid #fca5a5',
-                  padding: '10px',
-                  borderRadius: '6px',
-                  color: '#991b1b',
-                  fontSize: '12px'
-                }}>
+                <div className="msvt-detail-deleted-banner">
                   <strong>⚠️ BẢN GHI ĐÃ XÓA MỀM</strong>
                   <div>Thời điểm xóa: {selectedForDetail.deleted_at ? new Date(selectedForDetail.deleted_at).toLocaleString('vi-VN') : 'N/A'}</div>
                   <div>ID Quản trị viên xóa: #{selectedForDetail.deleted_by || 'N/A'}</div>
@@ -465,18 +465,11 @@ const MsvtAdminDashboard = ({
               )}
             </div>
 
-            <div style={{ padding: '12px 20px', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0', textAlign: 'right' }}>
+            <div className="msvt-detail-modal-footer">
               <button
                 type="button"
+                className="msvt-detail-btn-close"
                 onClick={() => setIsDetailOpen(false)}
-                style={{
-                  padding: '7px 16px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: 'white',
-                  cursor: 'pointer',
-                  fontWeight: 600
-                }}
               >
                 Đóng
               </button>
