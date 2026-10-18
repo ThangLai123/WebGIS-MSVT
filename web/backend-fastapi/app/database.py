@@ -39,6 +39,10 @@ else:
 # Phát hiện môi trường Serverless (Vercel / AWS Lambda)
 IS_SERVERLESS = bool(os.getenv("VERCEL")) or bool(os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
 
+# Cấu hình search_path cho mọi phiên kết nối: tự động nhận diện cả schema public và extensions
+# Đảm bảo các hàm PostGIS (ST_Covers, ST_IsValid, v.v.) hoạt động trơn tru trên cả Local Docker và Supabase
+db_connect_args = {"options": "-csearch_path=public,extensions"}
+
 if IS_SERVERLESS:
     # Trên Vercel Serverless Function, sử dụng NullPool để đóng kết nối ngay sau khi hoàn tất request,
     # tránh làm cạn kiệt connection pool của dịch vụ PostgreSQL Cloud khi có nhiều function instances.
@@ -46,6 +50,7 @@ if IS_SERVERLESS:
     engine = create_engine(
         DATABASE_URL,
         poolclass=NullPool,
+        connect_args=db_connect_args,
         echo=False
     )
 else:
@@ -55,6 +60,7 @@ else:
         pool_pre_ping=True,
         pool_size=10,
         max_overflow=20,
+        connect_args=db_connect_args,
         echo=False
     )
 
