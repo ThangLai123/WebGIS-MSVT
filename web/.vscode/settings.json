@@ -1,7 +1,8 @@
 {
   "python.defaultInterpreterPath": "${workspaceFolder}/backend-fastapi/.venv/Scripts/python.exe",
   "python.analysis.extraPaths": [
-    "${workspaceFolder}/backend-fastapi"
+    "${workspaceFolder}/backend-fastapi",
+    "${workspaceFolder}/backend-fastapi/.venv/Lib/site-packages"
   ],
   "python.analysis.autoSearchPaths": true,
   "python.analysis.diagnosticSeverityOverrides": {

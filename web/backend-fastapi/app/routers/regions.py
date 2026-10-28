@@ -460,41 +460,76 @@ def validate_strict_geometry(
 
 def check_duplicate_msvt(
     db: Session,
-    msvt_moi: Optional[str],
-    msvt_cu: Optional[str],
+    msvt_moi: Optional[str] = None,
+    msvt_cu: Optional[str] = None,
     exclude_id: Optional[int] = None
 ):
     """
-    Kiểm tra mã trùng lặp với các bản ghi đang hoạt động (chưa bị xóa mềm).
-    Nếu trùng lặp, trả về mã HTTP 409 Conflict thay vì ghi đè.
+    Kiểm tra mã trùng lặp nghiêm ngặt theo quy tắc nghiệp vụ WebGIS MSVT:
+    - msvt_moi đối chiếu độc lập với msvt_moi trong CSDL (không so chéo với msvt_cu).
+    - msvt_cu đối chiếu độc lập với msvt_cu trong CSDL (không so chéo với msvt_moi).
+    - Chuẩn hóa: strip khoảng trắng ở đầu/cuối, giữ nguyên số 0 ở đầu mã, so sánh không phân biệt hoa/thường.
+    - Không coi hai trường trống hoặc NULL là mã trùng nhau.
+    - Khi chỉnh sửa (exclude_id), không coi mã của chính bản ghi đó là trùng.
+    - Kiểm tra cả bản ghi đang hoạt động và bản ghi đã xóa mềm (chống xung đột khi khôi phục).
+    - Nếu trùng, trả về HTTP 409 Conflict với thông điệp tiếng Việt cụ thể và định danh trường lỗi.
     """
-    codes_to_check = []
-    if msvt_moi and msvt_moi.strip():
-        codes_to_check.append(msvt_moi.strip())
-    if msvt_cu and msvt_cu.strip():
-        codes_to_check.append(msvt_cu.strip())
+    from sqlalchemy import func
 
-    if not codes_to_check:
-        return
-
-    query = db.query(VungTrong).filter(
-        VungTrong.is_deleted == False,
-        or_(
-            VungTrong.msvt_moi.in_(codes_to_check),
-            VungTrong.msvt_cu.in_(codes_to_check)
+    # 1. Kiểm tra mã MSVT mới
+    norm_moi = msvt_moi.strip() if msvt_moi is not None and msvt_moi.strip() else None
+    if norm_moi:
+        q_moi = db.query(VungTrong.id, VungTrong.is_deleted).filter(
+            func.lower(VungTrong.msvt_moi) == norm_moi.lower()
         )
-    )
+        if exclude_id is not None:
+            q_moi = q_moi.filter(VungTrong.id != exclude_id)
 
-    if exclude_id is not None:
-        query = query.filter(VungTrong.id != exclude_id)
+        # Sắp xếp ưu tiên bản ghi hoạt động lên trước (is_deleted = False trước)
+        dup_moi = q_moi.order_by(VungTrong.is_deleted.asc(), VungTrong.id.asc()).first()
+        if dup_moi:
+            if dup_moi.is_deleted:
+                msg = f"Mã vùng trồng mới '{norm_moi}' đã tồn tại trong cơ sở dữ liệu (thuộc bản ghi #{dup_moi.id} đã xóa mềm). Vui lòng khôi phục bản ghi này hoặc sử dụng mã khác."
+            else:
+                msg = f"Mã vùng trồng mới '{norm_moi}' đã tồn tại trong hệ thống (thuộc bản ghi #{dup_moi.id}). Vui lòng kiểm tra hoặc sử dụng mã khác."
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "DUPLICATE_MSVT_MOI",
+                    "message": msg,
+                    "field": "msvt_moi",
+                    "duplicate_code": norm_moi,
+                    "existing_id": dup_moi.id,
+                    "is_deleted": dup_moi.is_deleted
+                }
+            )
 
-    duplicate = query.first()
-    if duplicate:
-        dup_code = duplicate.msvt_moi if duplicate.msvt_moi in codes_to_check else duplicate.msvt_cu
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Mã số vùng trồng '{dup_code}' đã tồn tại trong hệ thống (ID={duplicate.id}). Không thể tạo trùng lặp."
+    # 2. Kiểm tra mã MSVT cũ
+    norm_cu = msvt_cu.strip() if msvt_cu is not None and msvt_cu.strip() else None
+    if norm_cu:
+        q_cu = db.query(VungTrong.id, VungTrong.is_deleted).filter(
+            func.lower(VungTrong.msvt_cu) == norm_cu.lower()
         )
+        if exclude_id is not None:
+            q_cu = q_cu.filter(VungTrong.id != exclude_id)
+
+        dup_cu = q_cu.order_by(VungTrong.is_deleted.asc(), VungTrong.id.asc()).first()
+        if dup_cu:
+            if dup_cu.is_deleted:
+                msg = f"Mã vùng trồng cũ '{norm_cu}' đã tồn tại trong cơ sở dữ liệu (thuộc bản ghi #{dup_cu.id} đã xóa mềm). Vui lòng khôi phục bản ghi này hoặc sử dụng mã khác."
+            else:
+                msg = f"Mã vùng trồng cũ '{norm_cu}' đã tồn tại trong hệ thống (thuộc bản ghi #{dup_cu.id}). Vui lòng kiểm tra hoặc sử dụng mã khác."
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "DUPLICATE_MSVT_CU",
+                    "message": msg,
+                    "field": "msvt_cu",
+                    "duplicate_code": norm_cu,
+                    "existing_id": dup_cu.id,
+                    "is_deleted": dup_cu.is_deleted
+                }
+            )
 
 
 # ==============================================================================

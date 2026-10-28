@@ -1869,7 +1869,29 @@
   }
 }
 
+/* Đánh dấu trường trùng mã MSVT */
+.msvt-input-duplicate-error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+  animation: msvt-shake 0.3s ease-in-out;
+}
 
+.msvt-field-duplicate-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #dc2626;
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
 
-
-
+@keyframes msvt-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}

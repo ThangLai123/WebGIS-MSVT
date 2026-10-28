@@ -416,6 +416,7 @@ class ImportRowItem(BaseModel):
     area_diff_pct: Optional[float] = None
     status: str  # VALID, WARNING, DUPLICATE, INVALID
     status_label: str
+    duplicate_type: Optional[str] = None  # 'DB', 'FILE', None
     issues: List[str] = []
     warnings: List[str] = []
     selected: bool = True
@@ -432,6 +433,8 @@ class ImportSummaryResponse(BaseModel):
     valid_count: int
     warning_count: int
     duplicate_count: int
+    duplicate_db_count: int = 0
+    duplicate_file_count: int = 0
     error_count: int
     selected_count: int
     total_area_ha: float
@@ -456,11 +459,16 @@ class ImportCommitRequest(BaseModel):
 class ImportCommitResponse(BaseModel):
     job_id: str
     message: str
+    total_rows: int = 0
     inserted_count: int
     skipped_count: int
-    failed_count: int
+    skipped_db_count: int = 0
+    skipped_file_count: int = 0
+    error_count: int = 0
+    failed_count: int = 0
     inserted_ids: List[int]
     total_area_added_ha: float
+    skipped_rows_detail: List[Dict[str, Any]] = []
 
 
 class ImportJobListItem(BaseModel):

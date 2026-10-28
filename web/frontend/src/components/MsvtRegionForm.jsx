@@ -202,6 +202,8 @@ const MsvtRegionForm = ({
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successInfo, setSuccessInfo] = useState('');
+  const [duplicateField, setDuplicateField] = useState(null); // 'msvt_moi' | 'msvt_cu' | null
+  const [duplicateInfo, setDuplicateInfo] = useState(null); // { code, id }
   const [postgisValidation, setPostgisValidation] = useState(null);
   const [isValidatingPostGIS, setIsValidatingPostGIS] = useState(false);
   const previewMapRef = useRef(null);
@@ -706,6 +708,11 @@ const MsvtRegionForm = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (duplicateField === name) {
+      setDuplicateField(null);
+      setDuplicateInfo(null);
+      setErrorMessage('');
+    }
   };
 
   // Xử lý thay đổi chế độ nhận diện định dạng (Auto / Decimal / DMS)
@@ -1001,6 +1008,8 @@ const MsvtRegionForm = ({
     if (e && e.preventDefault) e.preventDefault();
     setErrorMessage('');
     setSuccessInfo('');
+    setDuplicateField(null);
+    setDuplicateInfo(null);
 
     // BẢO VỆ NGHIÊM NGẶT (Section IV & Section VI):
     // Không cho phép lưu khi trạng thái validation chưa đạt chuẩn
@@ -1163,7 +1172,15 @@ const MsvtRegionForm = ({
       onClose();
     } catch (err) {
       console.error('[MsvtRegionForm] Lỗi khi lưu vùng trồng:', err);
-      if (err.detail && typeof err.detail === 'object') {
+      if (err.status === 409 || err.code?.startsWith('DUPLICATE_MSVT')) {
+        const dupField = err.field || (err.message && err.message.toLowerCase().includes('cũ') ? 'msvt_cu' : 'msvt_moi');
+        setDuplicateField(dupField);
+        setDuplicateInfo({
+          code: err.duplicate_code || (dupField === 'msvt_moi' ? formData.msvt_moi : formData.msvt_cu),
+          id: err.existing_id
+        });
+        setErrorMessage(err.message || 'Mã vùng trồng đã tồn tại trong hệ thống. Vui lòng kiểm tra hoặc sử dụng mã khác.');
+      } else if (err.detail && typeof err.detail === 'object') {
         const edgesStr = err.detail.affected_edges && err.detail.affected_edges.length > 0
           ? ` (Cạnh lỗi: ${err.detail.affected_edges.join(', ')})`
           : '';
@@ -1217,31 +1234,51 @@ const MsvtRegionForm = ({
             <h4 className="msvt-form-section-title">🏷️ 1. Thông tin Mã số Vùng trồng (MSVT)</h4>
             <div className="msvt-form-grid-2">
               <div className="msvt-field-group">
-                <label className="msvt-field-label">Mã MSVT mới (Định dạng chuẩn)</label>
+                <label className="msvt-field-label">
+                  Mã MSVT mới (Định dạng chuẩn)
+                  {duplicateField === 'msvt_moi' && (
+                    <span className="msvt-field-duplicate-badge">⚠️ Trùng mã trong hệ thống</span>
+                  )}
+                </label>
                 <input
                   type="text"
                   name="msvt_moi"
-                  className="msvt-field-input"
+                  className={`msvt-field-input ${duplicateField === 'msvt_moi' ? 'msvt-input-duplicate-error' : ''}`}
                   placeholder="Ví dụ: VN-40-705-0001-01-24"
                   value={formData.msvt_moi}
                   onChange={handleChange}
                   disabled={loading}
+                  autoFocus={duplicateField === 'msvt_moi'}
                 />
-                <span className="msvt-field-hint">Bảo toàn chuỗi gốc và các số 0 ở đầu.</span>
+                <span className="msvt-field-hint">
+                  {duplicateField === 'msvt_moi' && duplicateInfo?.id
+                    ? `Mã này đang thuộc về bản ghi ID #${duplicateInfo.id}. Vui lòng nhập mã khác.`
+                    : 'Bảo toàn chuỗi gốc và các số 0 ở đầu.'}
+                </span>
               </div>
 
               <div className="msvt-field-group">
-                <label className="msvt-field-label">Mã MSVT cũ</label>
+                <label className="msvt-field-label">
+                  Mã MSVT cũ
+                  {duplicateField === 'msvt_cu' && (
+                    <span className="msvt-field-duplicate-badge">⚠️ Trùng mã trong hệ thống</span>
+                  )}
+                </label>
                 <input
                   type="text"
                   name="msvt_cu"
-                  className="msvt-field-input"
+                  className={`msvt-field-input ${duplicateField === 'msvt_cu' ? 'msvt-input-duplicate-error' : ''}`}
                   placeholder="Ví dụ: VN-40-705-0001-01-22"
                   value={formData.msvt_cu}
                   onChange={handleChange}
                   disabled={loading}
+                  autoFocus={duplicateField === 'msvt_cu'}
                 />
-                <span className="msvt-field-hint">Mã vùng trồng trước khi cấp mã mới (nếu có).</span>
+                <span className="msvt-field-hint">
+                  {duplicateField === 'msvt_cu' && duplicateInfo?.id
+                    ? `Mã này đang thuộc về bản ghi ID #${duplicateInfo.id}. Vui lòng nhập mã khác.`
+                    : 'Mã vùng trồng trước khi cấp mã mới (nếu có).'}
+                </span>
               </div>
             </div>
           </div>

@@ -342,6 +342,27 @@ export default function MsvtImportModal({ isOpen, onClose, onSuccess }) {
     }
   };
 
+  const handleDownloadSkippedCsv = () => {
+    if (!commitResult?.skipped_rows_detail || commitResult.skipped_rows_detail.length === 0) return;
+    const headers = ['Dòng Excel', 'Mã MSVT', 'Trạng thái', 'Lý do'];
+    const rows = commitResult.skipped_rows_detail.map(item => [
+      item.excel_row,
+      `"${(item.msvt || '').replace(/"/g, '""')}"`,
+      `"${item.status}"`,
+      `"${(item.reason || '').replace(/"/g, '""')}"`
+    ]);
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `bao_cao_bo_qua_msvt_${jobData?.job_id || 'result'}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // ============================================================================
   // RENDER GIAO DIỆN TỪNG BƯỚC
   // ============================================================================
@@ -793,15 +814,23 @@ export default function MsvtImportModal({ isOpen, onClose, onSuccess }) {
 
               <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '12px 16px', border: '1px solid #e2e8f0' }}>
                 <div className="msvt-commit-stat-row">
+                  <span>Tổng số dòng dữ liệu:</span>
+                  <strong>{previewSummary?.total_rows || 0} dòng</strong>
+                </div>
+                <div className="msvt-commit-stat-row">
                   <span>Số bản ghi được chọn nạp mới:</span>
                   <strong style={{ color: '#16a34a' }}>{selectedRowIds.size} vùng trồng</strong>
                 </div>
                 <div className="msvt-commit-stat-row">
-                  <span>Số bản ghi bỏ qua do trùng mã:</span>
-                  <strong style={{ color: '#2563eb' }}>{previewSummary?.duplicate_count || 0} bản ghi</strong>
+                  <span>Bỏ qua do trùng database:</span>
+                  <strong style={{ color: '#2563eb' }}>{previewSummary?.duplicate_db_count ?? (previewSummary?.duplicate_count || 0)} bản ghi</strong>
                 </div>
                 <div className="msvt-commit-stat-row">
-                  <span>Số bản ghi lỗi bị loại trừ:</span>
+                  <span>Bỏ qua do trùng trong file Excel:</span>
+                  <strong style={{ color: '#0891b2' }}>{previewSummary?.duplicate_file_count || 0} bản ghi</strong>
+                </div>
+                <div className="msvt-commit-stat-row">
+                  <span>Dòng lỗi dữ liệu (loại trừ):</span>
                   <strong style={{ color: '#dc2626' }}>{previewSummary?.error_count || 0} bản ghi</strong>
                 </div>
                 <div className="msvt-commit-stat-row" style={{ borderBottom: 'none' }}>
@@ -839,13 +868,87 @@ export default function MsvtImportModal({ isOpen, onClose, onSuccess }) {
           {/* ---------------- BƯỚC 6: BÁO CÁO KẾT QUẢ ---------------- */}
           {currentStep === 6 && commitResult && (
             <div className="msvt-result-box">
-              <div className="msvt-result-icon">✓</div>
-              <h3 className="msvt-result-title">Nhập dữ liệu hoàn tất thành công!</h3>
-              <p style={{ margin: 0, fontSize: '14px', color: '#475569', maxWidth: '520px', lineHeight: '1.6' }}>
-                Đã thêm <strong>{commitResult.inserted_count}</strong> vùng trồng mới vào cơ sở dữ liệu PostgreSQL.
-                {commitResult.skipped_count > 0 && ` Đã tự động bỏ qua ${commitResult.skipped_count} bản ghi trùng mã.`}
-                {commitResult.total_area_added_ha > 0 && ` Tổng diện tích canh tác bổ sung: ~${commitResult.total_area_added_ha} ha.`}
+              <div className="msvt-result-icon">
+                {commitResult.inserted_count > 0 ? '✓' : 'ℹ️'}
+              </div>
+              <h3 className="msvt-result-title">
+                {commitResult.inserted_count > 0
+                  ? 'KẾT QUẢ IMPORT EXCEL: THÀNH CÔNG'
+                  : 'KẾT QUẢ IMPORT EXCEL: HOÀN TẤT'}
+              </h3>
+              <p style={{ margin: 0, fontSize: '14px', color: '#475569', maxWidth: '640px', lineHeight: '1.6' }}>
+                {commitResult.message}
               </p>
+
+              {/* 5 Thẻ KPI Thống kê chuẩn xác */}
+              <div className="msvt-kpi-cards-grid">
+                <div className="msvt-kpi-card total">
+                  <div className="msvt-kpi-card-label">Tổng số dòng</div>
+                  <div className="msvt-kpi-card-value">{commitResult.total_rows || 0}</div>
+                </div>
+                <div className="msvt-kpi-card success">
+                  <div className="msvt-kpi-card-label">Thêm mới thành công</div>
+                  <div className="msvt-kpi-card-value">{commitResult.inserted_count || 0}</div>
+                </div>
+                <div className="msvt-kpi-card dup-db">
+                  <div className="msvt-kpi-card-label">Bỏ qua do trùng database</div>
+                  <div className="msvt-kpi-card-value">{commitResult.skipped_db_count || 0}</div>
+                </div>
+                <div className="msvt-kpi-card dup-file">
+                  <div className="msvt-kpi-card-label">Bỏ qua do trùng trong Excel</div>
+                  <div className="msvt-kpi-card-value">{commitResult.skipped_file_count || 0}</div>
+                </div>
+                <div className="msvt-kpi-card error">
+                  <div className="msvt-kpi-card-label">Dòng lỗi dữ liệu</div>
+                  <div className="msvt-kpi-card-value">{commitResult.error_count || 0}</div>
+                </div>
+              </div>
+
+              {/* Bảng chi tiết những dòng bị bỏ qua hoặc lỗi */}
+              {commitResult.skipped_rows_detail && commitResult.skipped_rows_detail.length > 0 && (
+                <div className="msvt-skipped-detail-container">
+                  <div className="msvt-skipped-detail-header">
+                    <span style={{ fontWeight: 700, fontSize: '13.5px', color: '#1e293b' }}>
+                      📋 Bảng chi tiết các dòng bị bỏ qua hoặc lỗi ({commitResult.skipped_rows_detail.length} dòng):
+                    </span>
+                    <button
+                      type="button"
+                      className="msvt-btn-csv-download"
+                      onClick={handleDownloadSkippedCsv}
+                    >
+                      📥 Tải báo cáo CSV dòng bỏ qua
+                    </button>
+                  </div>
+                  <div className="msvt-skipped-table-wrapper">
+                    <table className="msvt-skipped-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '90px' }}>Dòng Excel</th>
+                          <th style={{ width: '220px' }}>Mã MSVT</th>
+                          <th style={{ width: '100px' }}>Trạng thái</th>
+                          <th>Lý do</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {commitResult.skipped_rows_detail.map((rowItem, idx) => (
+                          <tr key={idx}>
+                            <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{rowItem.excel_row}</td>
+                            <td><code>{rowItem.msvt}</code></td>
+                            <td>
+                              <span className={`msvt-badge ${rowItem.status === 'Bỏ qua' ? 'duplicate' : 'invalid'}`}>
+                                {rowItem.status}
+                              </span>
+                            </td>
+                            <td style={{ color: rowItem.status === 'Bỏ qua' ? '#2563eb' : '#dc2626' }}>
+                              {rowItem.reason}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
 
               <div className="msvt-result-actions">
                 <button
@@ -853,7 +956,7 @@ export default function MsvtImportModal({ isOpen, onClose, onSuccess }) {
                   className="msvt-btn msvt-btn-primary"
                   onClick={handleDownloadReport}
                 >
-                  📊 Xuất báo cáo kiểm định Excel (.xlsx)
+                  📊 Xuất báo cáo kiểm định Excel 6 sheet (.xlsx)
                 </button>
                 <button
                   type="button"
@@ -912,10 +1015,11 @@ export default function MsvtImportModal({ isOpen, onClose, onSuccess }) {
               <button
                 type="button"
                 className="msvt-btn msvt-btn-primary"
-                disabled={selectedRowIds.size === 0}
                 onClick={() => setCurrentStep(5)}
               >
-                Tiếp tục xác nhận ({selectedRowIds.size} bản ghi) ▶
+                {selectedRowIds.size > 0
+                  ? `Tiếp tục xác nhận (${selectedRowIds.size} bản ghi) ▶`
+                  : 'Tiếp tục hoàn tất (Bỏ qua dòng trùng) ▶'}
               </button>
             )}
 
@@ -923,7 +1027,7 @@ export default function MsvtImportModal({ isOpen, onClose, onSuccess }) {
               <button
                 type="button"
                 className="msvt-btn msvt-btn-success"
-                disabled={loading || !agreeTerms || selectedRowIds.size === 0}
+                disabled={loading || !agreeTerms}
                 onClick={handleCommitImport}
               >
                 {loading ? 'Đang ghi vào PostgreSQL...' : '🚀 XÁC NHẬN NHẬP DỮ LIỆU'}

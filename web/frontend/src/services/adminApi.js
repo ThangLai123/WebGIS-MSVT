@@ -129,8 +129,15 @@ async function handleResponseError(response) {
       finalError = new Error(detailMessage || `Yêu cầu thất bại (${response.status}: ${response.statusText})`);
       break;
   }
+  finalError.status = response.status;
   if (detail) {
     finalError.detail = detail;
+    if (typeof detail === 'object') {
+      finalError.code = detail.code;
+      finalError.field = detail.field;
+      finalError.duplicate_code = detail.duplicate_code;
+      finalError.existing_id = detail.existing_id;
+    }
   }
   return finalError;
 }

@@ -463,9 +463,9 @@ async def validate_import_job(
             for c in range(mrange.min_col, mrange.max_col + 1):
                 merged_map[(r, c)] = top_left_val
 
-    # Lấy toàn bộ MSVT hiện hữu trong database để kiểm tra trùng
+    # Lấy các mã MSVT hiện hữu trong database để kiểm tra trùng (chỉ lấy các trường cần thiết, bỏ qua bản ghi không có mã)
     db_records = db.execute(
-        text("SELECT id, msvt_moi, msvt_cu, is_deleted, dia_chi_msvt FROM public.vung_trong")
+        text("SELECT id, msvt_moi, msvt_cu, is_deleted FROM public.vung_trong WHERE msvt_moi IS NOT NULL OR msvt_cu IS NOT NULL")
     ).fetchall()
 
     db_active_moi: Dict[str, int] = {}
@@ -474,23 +474,24 @@ async def validate_import_job(
     db_deleted_cu: Dict[str, int] = {}
 
     for row in db_records:
-        r_id, r_moi, r_cu, r_deleted, _ = row
+        r_id, r_moi, r_cu, r_deleted = row
         if r_moi:
-            norm_m = r_moi.strip()
+            norm_m = r_moi.strip().lower()
             if r_deleted:
                 db_deleted_moi[norm_m] = r_id
             else:
                 db_active_moi[norm_m] = r_id
         if r_cu:
-            norm_c = r_cu.strip()
+            norm_c = r_cu.strip().lower()
             if r_deleted:
                 db_deleted_cu[norm_c] = r_id
             else:
                 db_active_cu[norm_c] = r_id
 
-    # Theo dõi trùng trong cùng file Excel
-    file_seen_moi: Dict[str, int] = {}
-    file_seen_cu: Dict[str, int] = {}
+    # Theo dõi các dòng hợp lệ đã đăng ký mã trong cùng file Excel (để chống trùng trong file)
+    # Lưu dạng: lower(code) -> excel_row (chỉ đăng ký khi dòng đó hợp lệ về dữ liệu)
+    file_claimed_moi: Dict[str, int] = {}
+    file_claimed_cu: Dict[str, int] = {}
 
     validated_rows: List[Dict[str, Any]] = []
     mapping = payload.mapping
@@ -542,58 +543,26 @@ async def validate_import_job(
         row_counter += 1
         issues: List[str] = []
         warnings: List[str] = []
-        is_duplicate = False
+        data_issues: List[str] = []
 
         # 1. Kiểm tra mã định danh MSVT
         if not val_msvt_moi and not val_msvt_cu:
-            issues.append("Thiếu cả mã MSVT mới và MSVT cũ (không có thông tin định danh vùng trồng).")
+            data_issues.append("Thiếu cả mã MSVT mới và MSVT cũ (không có thông tin định danh vùng trồng).")
         elif not val_msvt_moi and val_msvt_cu:
             warnings.append(f"Chưa có mã MSVT mới, sử dụng mã MSVT cũ '{val_msvt_cu}' để định danh.")
         elif val_msvt_moi and not val_msvt_cu:
             warnings.append(f"Có mã MSVT mới '{val_msvt_moi}' nhưng chưa có mã MSVT cũ.")
 
-        # 2. Kiểm tra trùng mã trong cùng file Excel
-        if val_msvt_moi:
-            if val_msvt_moi in file_seen_moi:
-                is_duplicate = True
-                issues.append(f"Mã MSVT mới '{val_msvt_moi}' bị trùng lặp với dòng {file_seen_moi[val_msvt_moi]} trong cùng file Excel.")
-            else:
-                file_seen_moi[val_msvt_moi] = r
-
-        if val_msvt_cu:
-            if val_msvt_cu in file_seen_cu:
-                is_duplicate = True
-                issues.append(f"Mã MSVT cũ '{val_msvt_cu}' bị trùng lặp với dòng {file_seen_cu[val_msvt_cu]} trong cùng file Excel.")
-            else:
-                file_seen_cu[val_msvt_cu] = r
-
-        # 3. Kiểm tra trùng mã với database hiện hữu
-        if val_msvt_moi:
-            if val_msvt_moi in db_active_moi:
-                is_duplicate = True
-                issues.append(f"Mã MSVT mới '{val_msvt_moi}' đã tồn tại trong database (Bản ghi ID: {db_active_moi[val_msvt_moi]}).")
-            elif val_msvt_moi in db_deleted_moi:
-                is_duplicate = True
-                issues.append(f"Mã MSVT mới '{val_msvt_moi}' trùng với vùng trồng đã xóa mềm (ID: {db_deleted_moi[val_msvt_moi]}).")
-
-        if val_msvt_cu:
-            if val_msvt_cu in db_active_cu:
-                is_duplicate = True
-                issues.append(f"Mã MSVT cũ '{val_msvt_cu}' đã tồn tại trong database (Bản ghi ID: {db_active_cu[val_msvt_cu]}).")
-            elif val_msvt_cu in db_deleted_cu:
-                is_duplicate = True
-                issues.append(f"Mã MSVT cũ '{val_msvt_cu}' trùng với vùng trồng đã xóa mềm (ID: {db_deleted_cu[val_msvt_cu]}).")
-
-        # 4. Chuẩn hóa số điện thoại
+        # 2. Chuẩn hóa số điện thoại
         sdt_clean = normalize_phone(raw_row_vals.get("so_dien_thoai"))
 
-        # 5. Kiểm tra email
+        # 3. Kiểm tra email
         email_clean = clean_text(raw_row_vals.get("email"))
         if email_clean:
             if "@" not in email_clean or "." not in email_clean:
                 warnings.append(f"Định dạng email '{email_clean}' có thể không hợp lệ.")
 
-        # 6. Kiểm tra số hộ tham gia
+        # 4. Kiểm tra số hộ tham gia
         so_ho_clean = None
         raw_so_ho = raw_row_vals.get("so_ho_tham_gia")
         if raw_so_ho is not None and raw_so_ho.strip():
@@ -601,42 +570,42 @@ async def validate_import_job(
                 # Ép kiểu float rồi sang int nếu là số nguyên
                 float_ho = float(raw_so_ho.replace(",", "."))
                 if float_ho < 0:
-                    issues.append(f"Số hộ tham gia mang giá trị âm ({float_ho}).")
+                    data_issues.append(f"Số hộ tham gia mang giá trị âm ({float_ho}).")
                 elif not float_ho.is_integer():
                     warnings.append(f"Số hộ tham gia là số thập phân ({float_ho}), làm tròn thành {round(float_ho)}.")
                     so_ho_clean = round(float_ho)
                 else:
                     so_ho_clean = int(float_ho)
             except Exception:
-                issues.append(f"Số hộ tham gia không hợp lệ: '{raw_so_ho}'.")
+                data_issues.append(f"Số hộ tham gia không hợp lệ: '{raw_so_ho}'.")
 
-        # 7. Kiểm tra diện tích (ha)
+        # 5. Kiểm tra diện tích (ha)
         dien_tich_clean = None
         raw_dt = raw_row_vals.get("dien_tich_ha")
         if raw_dt is not None and raw_dt.strip():
             try:
                 dt_val = float(raw_dt.replace(",", "."))
                 if dt_val < 0:
-                    issues.append(f"Diện tích mang giá trị âm ({dt_val} ha).")
+                    data_issues.append(f"Diện tích mang giá trị âm ({dt_val} ha).")
                 elif dt_val > 9999999999.9999:
-                    issues.append(f"Diện tích vượt quá giới hạn số học cho phép ({dt_val} ha).")
+                    data_issues.append(f"Diện tích vượt quá giới hạn số học cho phép ({dt_val} ha).")
                 else:
                     dien_tich_clean = round(dt_val, 4)
             except Exception:
-                issues.append(f"Diện tích không phải số hợp lệ: '{raw_dt}'.")
+                data_issues.append(f"Diện tích không phải số hợp lệ: '{raw_dt}'.")
 
-        # 8. Kiểm tra sản lượng
+        # 6. Kiểm tra sản lượng
         tong_sl_clean = None
         raw_tsl = raw_row_vals.get("tong_san_luong_tan")
         if raw_tsl is not None and raw_tsl.strip():
             try:
                 tsl_val = float(raw_tsl.replace(",", "."))
                 if tsl_val < 0:
-                    issues.append(f"Tổng sản lượng mang giá trị âm ({tsl_val} tấn).")
+                    data_issues.append(f"Tổng sản lượng mang giá trị âm ({tsl_val} tấn).")
                 else:
                     tong_sl_clean = round(tsl_val, 4)
             except Exception:
-                issues.append(f"Tổng sản lượng không hợp lệ: '{raw_tsl}'.")
+                data_issues.append(f"Tổng sản lượng không hợp lệ: '{raw_tsl}'.")
 
         ns_clean = None
         raw_ns = raw_row_vals.get("san_luong_tan_ha")
@@ -644,13 +613,13 @@ async def validate_import_job(
             try:
                 ns_val = float(raw_ns.replace(",", "."))
                 if ns_val < 0:
-                    issues.append(f"Năng suất mang giá trị âm ({ns_val} tấn/ha).")
+                    data_issues.append(f"Năng suất mang giá trị âm ({ns_val} tấn/ha).")
                 else:
                     ns_clean = round(ns_val, 4)
             except Exception:
-                issues.append(f"Năng suất không hợp lệ: '{raw_ns}'.")
+                data_issues.append(f"Năng suất không hợp lệ: '{raw_ns}'.")
 
-        # 9. Phân tích và kiểm định tọa độ GPS bằng coord_parser
+        # 7. Phân tích và kiểm định tọa độ GPS bằng coord_parser
         raw_coords_str = val_toa_do.strip() if val_toa_do is not None else ""
         geom_type = "MISSING"
         area_gis_ha = None
@@ -674,7 +643,7 @@ async def validate_import_job(
                 lat, lng = p["lat"], p["lng"]
                 if not (18.0 <= lat <= 20.5 and 103.5 <= lng <= 106.5):
                     outside_bbox = True
-                    issues.append(f"Tọa độ ({lat}, {lng}) nằm ngoài phạm vi địa lý tỉnh Nghệ An [18.0-20.5, 103.5-106.5].")
+                    data_issues.append(f"Tọa độ ({lat}, {lng}) nằm ngoài phạm vi địa lý tỉnh Nghệ An [18.0-20.5, 103.5-106.5].")
                     geom_type = "INVALID"
                     break
 
@@ -740,26 +709,87 @@ async def validate_import_job(
                         warnings.append(f"Đa giác không hợp lệ ({g_reason}). Geometry để NULL, bảo toàn tọa độ gốc.")
                 else:
                     geom_type = "INVALID"
-                    issues.append("Không thể trích xuất tọa độ GPS hợp lệ từ chuỗi tọa độ gốc.")
+                    data_issues.append("Không thể trích xuất tọa độ GPS hợp lệ từ chuỗi tọa độ gốc.")
 
-        # 10. Phân loại trạng thái dòng (Section XIII)
+        # 8. Phân loại trạng thái dòng và kiểm tra trùng mã (Section XIII)
         status_code = "VALID"
         status_label = "Hợp lệ"
         default_selected = True
+        duplicate_type = None
 
-        if is_duplicate:
-            status_code = "DUPLICATE"
-            status_label = "Trùng dữ liệu"
-            default_selected = False  # Bỏ qua bản ghi trùng theo mặc định (Section VIII)
-        elif issues:
+        norm_moi = val_msvt_moi.strip().lower() if val_msvt_moi else None
+        norm_cu = val_msvt_cu.strip().lower() if val_msvt_cu else None
+
+        if data_issues:
+            # Dòng có lỗi dữ liệu: phân loại riêng là INVALID, không tính là trùng mã
             status_code = "INVALID"
             status_label = "Lỗi dữ liệu"
-            default_selected = False  # Lỗi thì không được phép chọn
-        elif warnings:
-            status_code = "WARNING"
-            status_label = "Cảnh báo"
-            # Trong chế độ kiểm soát nghiêm ngặt: Bản ghi thiếu tọa độ hoặc chỉ có 2 điểm không được chọn mặc định
-            default_selected = False if geom_type in ("MISSING", "INSUFFICIENT", "MULTI_GROUP", "INVALID") else True
+            default_selected = False
+            issues.extend(data_issues)
+            # Dòng lỗi không được claim mã để cho phép dòng hợp lệ tiếp theo của mã này được chấp nhận
+        else:
+            # Dữ liệu hợp lệ: Kiểm tra trùng mã độc lập cho msvt_moi và msvt_cu
+            # A. Kiểm tra trùng với Database trước
+            is_db_dup = False
+            db_dup_reason = None
+
+            if norm_moi:
+                if norm_moi in db_active_moi:
+                    is_db_dup = True
+                    db_dup_reason = f"Mã MSVT mới '{val_msvt_moi}' đã tồn tại trong database (Bản ghi ID: {db_active_moi[norm_moi]})."
+                elif norm_moi in db_deleted_moi:
+                    is_db_dup = True
+                    db_dup_reason = f"Mã MSVT mới '{val_msvt_moi}' trùng với vùng trồng đã xóa mềm (ID: {db_deleted_moi[norm_moi]})."
+
+            if not is_db_dup and norm_cu:
+                if norm_cu in db_active_cu:
+                    is_db_dup = True
+                    db_dup_reason = f"Mã MSVT cũ '{val_msvt_cu}' đã tồn tại trong database (Bản ghi ID: {db_active_cu[norm_cu]})."
+                elif norm_cu in db_deleted_cu:
+                    is_db_dup = True
+                    db_dup_reason = f"Mã MSVT cũ '{val_msvt_cu}' trùng với vùng trồng đã xóa mềm (ID: {db_deleted_cu[norm_cu]})."
+
+            if is_db_dup:
+                status_code = "DUPLICATE"
+                status_label = "Trùng database"
+                duplicate_type = "DB"
+                default_selected = False
+                if db_dup_reason:
+                    issues.append(db_dup_reason)
+            else:
+                # B. Kiểm tra trùng trong cùng file Excel
+                is_file_dup = False
+                file_dup_reason = None
+
+                if norm_moi and norm_moi in file_claimed_moi:
+                    is_file_dup = True
+                    file_dup_reason = f"Mã MSVT mới '{val_msvt_moi}' trùng với dòng {file_claimed_moi[norm_moi]} trong cùng file Excel."
+                elif norm_cu and norm_cu in file_claimed_cu:
+                    is_file_dup = True
+                    file_dup_reason = f"Mã MSVT cũ '{val_msvt_cu}' trùng với dòng {file_claimed_cu[norm_cu]} trong cùng file Excel."
+
+                if is_file_dup:
+                    status_code = "DUPLICATE"
+                    status_label = "Trùng trong file"
+                    duplicate_type = "FILE"
+                    default_selected = False
+                    if file_dup_reason:
+                        issues.append(file_dup_reason)
+                else:
+                    # Dòng này hợp lệ và đại diện cho mã! Đăng ký mã vào file_claimed
+                    if norm_moi:
+                        file_claimed_moi[norm_moi] = r
+                    if norm_cu:
+                        file_claimed_cu[norm_cu] = r
+
+                    if warnings:
+                        status_code = "WARNING"
+                        status_label = "Cảnh báo"
+                        default_selected = False if geom_type in ("MISSING", "INSUFFICIENT", "MULTI_GROUP", "INVALID") else True
+                    else:
+                        status_code = "VALID"
+                        status_label = "Hợp lệ"
+                        default_selected = True
 
         row_item = {
             "row_id": row_counter,
@@ -785,6 +815,7 @@ async def validate_import_job(
             "area_diff_pct": area_diff_pct,
             "status": status_code,
             "status_label": status_label,
+            "duplicate_type": duplicate_type,
             "issues": issues,
             "warnings": warnings,
             "selected": default_selected,
@@ -793,11 +824,13 @@ async def validate_import_job(
         }
         validated_rows.append(row_item)
 
-    # Đếm số lượng theo trạng thái
+    # Đếm số lượng theo trạng thái chính xác (tổng các nhóm = total_rows)
     total_r = len(validated_rows)
     valid_c = sum(1 for row in validated_rows if row["status"] == "VALID")
     warn_c = sum(1 for row in validated_rows if row["status"] == "WARNING")
-    dup_c = sum(1 for row in validated_rows if row["status"] == "DUPLICATE")
+    dup_db_c = sum(1 for row in validated_rows if row.get("duplicate_type") == "DB")
+    dup_file_c = sum(1 for row in validated_rows if row.get("duplicate_type") == "FILE")
+    dup_c = dup_db_c + dup_file_c
     err_c = sum(1 for row in validated_rows if row["status"] == "INVALID")
     sel_c = sum(1 for row in validated_rows if row["selected"])
     tot_area = sum(row["dien_tich_ha"] or 0.0 for row in validated_rows if row["selected"])
@@ -825,6 +858,8 @@ async def validate_import_job(
         valid_count=valid_c,
         warning_count=warn_c,
         duplicate_count=dup_c,
+        duplicate_db_count=dup_db_c,
+        duplicate_file_count=dup_file_c,
         error_count=err_c,
         selected_count=sel_c,
         total_area_ha=round(tot_area, 2),
@@ -966,49 +1001,128 @@ def commit_import_job(
         )
 
     validated_rows: List[Dict[str, Any]] = job.validated_rows
+    total_rows = len(validated_rows)
     selected_ids = set(payload.selected_row_ids) if payload.selected_row_ids is not None else None
 
-    # Lọc các dòng được phép commit
+    # 1. Phân loại và thu thập danh sách chi tiết các dòng lỗi và dòng trùng từ bước kiểm định
+    error_count = sum(1 for r in validated_rows if r.get("status") == "INVALID")
+    initial_file_dup_count = sum(1 for r in validated_rows if r.get("duplicate_type") == "FILE")
+    initial_db_dup_count = sum(1 for r in validated_rows if r.get("duplicate_type") == "DB")
+
+    skipped_rows_detail: List[Dict[str, Any]] = []
+
+    for r in validated_rows:
+        code_display = r.get("msvt_moi") or r.get("msvt_cu") or f"Dòng {r.get('excel_row')}"
+        if r.get("status") == "INVALID":
+            r_issues = r.get("issues") or []
+            skipped_rows_detail.append({
+                "excel_row": r.get("excel_row"),
+                "msvt": code_display,
+                "status": "Lỗi",
+                "reason": "; ".join(r_issues) if r_issues else "Dữ liệu không hợp lệ"
+            })
+        elif r.get("duplicate_type") == "DB":
+            r_issues = r.get("issues") or []
+            skipped_rows_detail.append({
+                "excel_row": r.get("excel_row"),
+                "msvt": code_display,
+                "status": "Bỏ qua",
+                "reason": r_issues[0] if r_issues else "Đã tồn tại trong database"
+            })
+        elif r.get("duplicate_type") == "FILE":
+            r_issues = r.get("issues") or []
+            skipped_rows_detail.append({
+                "excel_row": r.get("excel_row"),
+                "msvt": code_display,
+                "status": "Bỏ qua",
+                "reason": r_issues[0] if r_issues else "Trùng mã trong cùng file Excel"
+            })
+
+    # Lọc các dòng ứng viên được phép commit: Hợp lệ/Cảnh báo, không có cờ trùng và được chọn
     candidate_rows = []
     for r in validated_rows:
         is_selected = (r["row_id"] in selected_ids) if selected_ids is not None else r.get("selected", False)
-        # Tuyệt đối không cho phép dòng lỗi (INVALID) đi vào transaction
-        if is_selected and r["status"] != "INVALID":
-            # Trong chế độ kiểm soát nghiêm ngặt (Section XI):
-            # Không âm thầm nhập bản ghi không có geometry (MISSING, INSUFFICIENT, INVALID, MULTI_GROUP)
-            if not r.get("geojson") or r.get("geom_type") in ("MISSING", "INSUFFICIENT", "INVALID", "MULTI_GROUP"):
-                continue
+        if is_selected and r.get("status") in ("VALID", "WARNING") and not r.get("duplicate_type"):
             candidate_rows.append(r)
 
+    # Nếu không có dòng hợp lệ nào để ghi (ví dụ: toàn bộ file đều trùng hoặc lỗi dữ liệu):
+    # Hoàn thành phiên một cách an toàn mà KHÔNG ném lỗi 400 (đáp ứng tiêu chuẩn kiểm thử)
     if not candidate_rows:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Không có bản ghi hợp lệ có geometry đạt chuẩn nào được chọn để nhập vào cơ sở dữ liệu."
+        total_skipped_initial = initial_db_dup_count + initial_file_dup_count
+        job.status = "committed"
+        job.committed_at = datetime.now()
+        job.imported_count = 0
+        job.import_result = {
+            "total_rows": total_rows,
+            "inserted_count": 0,
+            "skipped_count": total_skipped_initial,
+            "skipped_db_count": initial_db_dup_count,
+            "skipped_file_count": initial_file_dup_count,
+            "error_count": error_count,
+            "skipped_rows_detail": skipped_rows_detail,
+            "inserted_ids": [],
+            "total_area_added_ha": 0.0,
+            "committed_by": current_user.username
+        }
+        db.commit()
+
+        msg = "Hoàn tất xử lý file Excel. Không có bản ghi mới nào được thêm (toàn bộ các dòng đã được tự động bỏ qua do trùng hoặc không hợp lệ)."
+        return ImportCommitResponse(
+            job_id=job.id,
+            message=msg,
+            inserted_count=0,
+            skipped_count=total_skipped_initial,
+            failed_count=0,
+            inserted_ids=[],
+            total_area_added_ha=0.0,
+            total_rows=total_rows,
+            skipped_db_count=initial_db_dup_count,
+            skipped_file_count=initial_file_dup_count,
+            error_count=error_count,
+            skipped_rows_detail=skipped_rows_detail
         )
 
-    # 1. Truy vấn kiểm tra lại trùng MSVT ngay trước khi INSERT (chống race condition)
-    active_moi_rows = db.execute(
-        text("SELECT msvt_moi FROM public.vung_trong WHERE is_deleted = false AND msvt_moi IS NOT NULL")
-    ).fetchall()
-    active_cu_rows = db.execute(
-        text("SELECT msvt_cu FROM public.vung_trong WHERE is_deleted = false AND msvt_cu IS NOT NULL")
-    ).fetchall()
+    # 1. Truy vấn kiểm tra lại trùng MSVT ngay trước khi INSERT (chống race condition bằng truy vấn theo lô có index)
+    cand_moi = [r["msvt_moi"].strip().lower() for r in candidate_rows if r.get("msvt_moi")]
+    cand_cu = [r["msvt_cu"].strip().lower() for r in candidate_rows if r.get("msvt_cu")]
 
-    latest_moi = {r[0].strip() for r in active_moi_rows if r[0]}
-    latest_cu = {r[0].strip() for r in active_cu_rows if r[0]}
+    latest_moi = set()
+    latest_cu = set()
+
+    if cand_moi:
+        moi_res = db.execute(
+            text("SELECT lower(trim(msvt_moi)) FROM public.vung_trong WHERE is_deleted = false AND lower(trim(msvt_moi)) = ANY(:cand_moi)"),
+            {"cand_moi": cand_moi}
+        ).fetchall()
+        latest_moi = {r[0] for r in moi_res if r[0]}
+
+    if cand_cu:
+        cu_res = db.execute(
+            text("SELECT lower(trim(msvt_cu)) FROM public.vung_trong WHERE is_deleted = false AND lower(trim(msvt_cu)) = ANY(:cand_cu)"),
+            {"cand_cu": cand_cu}
+        ).fetchall()
+        latest_cu = {r[0] for r in cu_res if r[0]}
 
     inserted_ids: List[int] = []
-    skipped_count = 0
+    skipped_db_commit_count = 0
     total_area_added = 0.0
 
     try:
         for row in candidate_rows:
             m_moi = row.get("msvt_moi")
             m_cu = row.get("msvt_cu")
+            norm_m = m_moi.strip().lower() if m_moi else None
+            norm_c = m_cu.strip().lower() if m_cu else None
 
-            # Bỏ qua nếu xuất hiện xung đột trùng lặp mới
-            if (m_moi and m_moi in latest_moi) or (m_cu and m_cu in latest_cu):
-                skipped_count += 1
+            # Bỏ qua nếu xuất hiện xung đột trùng lặp mới ngay tại thời điểm commit
+            if (norm_m and norm_m in latest_moi) or (norm_c and norm_c in latest_cu):
+                skipped_db_commit_count += 1
+                skipped_rows_detail.append({
+                    "excel_row": row.get("excel_row"),
+                    "msvt": m_moi or m_cu or f"Dòng {row.get('excel_row')}",
+                    "status": "Bỏ qua",
+                    "reason": "Đã tồn tại trong database (phát hiện xung đột khi commit)"
+                })
                 continue
 
             # Chuẩn bị câu lệnh INSERT có xử lý PostGIS Geometry
@@ -1077,19 +1191,27 @@ def commit_import_job(
                 if row.get("dien_tich_ha"):
                     total_area_added += float(row["dien_tich_ha"])
 
-                # Cập nhật danh sách MSVT để chống trùng chính các dòng trong cùng transaction
-                if m_moi:
-                    latest_moi.add(m_moi)
-                if m_cu:
-                    latest_cu.add(m_cu)
+                # Cập nhật danh sách MSVT để chống trùng chính các dòng tiếp theo trong cùng transaction
+                if norm_m:
+                    latest_moi.add(norm_m)
+                if norm_c:
+                    latest_cu.add(norm_c)
+
+        total_skipped_db = initial_db_dup_count + skipped_db_commit_count
+        total_skipped = total_skipped_db + initial_file_dup_count
 
         # Cập nhật trạng thái job
         job.status = "committed"
         job.committed_at = datetime.now()
         job.imported_count = len(inserted_ids)
         job.import_result = {
+            "total_rows": total_rows,
             "inserted_count": len(inserted_ids),
-            "skipped_count": skipped_count,
+            "skipped_count": total_skipped,
+            "skipped_db_count": total_skipped_db,
+            "skipped_file_count": initial_file_dup_count,
+            "error_count": error_count,
+            "skipped_rows_detail": skipped_rows_detail,
             "inserted_ids": inserted_ids,
             "total_area_added_ha": round(total_area_added, 2),
             "committed_by": current_user.username
@@ -1107,17 +1229,22 @@ def commit_import_job(
         )
 
     msg = f"Nhập thành công {len(inserted_ids)} vùng trồng mới vào cơ sở dữ liệu."
-    if skipped_count > 0:
-        msg += f" Đã tự động bỏ qua {skipped_count} bản ghi trùng mã."
+    if total_skipped > 0:
+        msg += f" Đã tự động bỏ qua {total_skipped} bản ghi trùng mã (Database: {total_skipped_db}, File Excel: {initial_file_dup_count})."
 
     return ImportCommitResponse(
         job_id=job.id,
         message=msg,
         inserted_count=len(inserted_ids),
-        skipped_count=skipped_count,
+        skipped_count=total_skipped,
         failed_count=0,
         inserted_ids=inserted_ids,
-        total_area_added_ha=round(total_area_added, 2)
+        total_area_added_ha=round(total_area_added, 2),
+        total_rows=total_rows,
+        skipped_db_count=total_skipped_db,
+        skipped_file_count=initial_file_dup_count,
+        error_count=error_count,
+        skipped_rows_detail=skipped_rows_detail
     )
 
 
