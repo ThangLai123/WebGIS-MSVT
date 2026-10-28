@@ -271,17 +271,6 @@ const MsvtLayer = ({
         if (isCancelled) return;
         setGeoJsonData(data);
         setLoading(false);
-
-        // Tính toán thống kê dữ liệu hình học thực tế (loại bỏ các bản ghi không có geometry)
-        if (data && data.features && onStatsUpdateRef.current) {
-          const pointCount = data.features.filter(f => f.geometry && f.geometry.type === 'Point').length;
-          const polyCount = data.features.filter(f => f.geometry && (f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon')).length;
-          onStatsUpdateRef.current({
-            total: pointCount + polyCount,
-            pointCount,
-            polyCount
-          });
-        }
       })
       .catch((err) => {
         if (isCancelled) return;
@@ -349,6 +338,32 @@ const MsvtLayer = ({
       return true;
     });
   }, [geoJsonData, msvtFilter, cropFilter, marketFilter]);
+
+  // Đồng bộ số liệu thống kê không gian lên component cha (App/MapViewer) khi tải hoặc khi lọc
+  useEffect(() => {
+    if (!geoJsonData || !geoJsonData.features || !onStatsUpdateRef.current) return;
+
+    const allFeatures = geoJsonData.features.filter(f => f && f.geometry && f.geometry.type);
+    const pointCount = allFeatures.filter(f => f.geometry.type === 'Point').length;
+    const polyCount = allFeatures.filter(f => f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon').length;
+    const withGeometry = pointCount + polyCount;
+
+    const isFiltered = Boolean(msvtFilter || cropFilter || marketFilter);
+    const filteredTotal = filteredFeatures.length;
+    const filteredPointCount = filteredFeatures.filter(f => f.geometry?.type === 'Point').length;
+    const filteredPolyCount = filteredFeatures.filter(f => f.geometry?.type === 'Polygon' || f.geometry?.type === 'MultiPolygon').length;
+
+    onStatsUpdateRef.current({
+      withGeometry,
+      pointCount,
+      polyCount,
+      filteredTotal,
+      filteredPointCount,
+      filteredPolyCount,
+      isFiltered,
+      total: isFiltered ? filteredTotal : withGeometry
+    });
+  }, [geoJsonData, filteredFeatures, msvtFilter, cropFilter, marketFilter]);
 
   // =========================================================================
   // VẼ MARKER ĐỒNG NHẤT (ONE MARKER PER MSVT)

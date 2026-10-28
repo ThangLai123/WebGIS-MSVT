@@ -133,6 +133,7 @@ const MapViewer = ({
   onSelectMsvtRegion = () => {},
   msvtFilters = { msvt: '', loaiCay: '', thiTruong: '' },
   onMsvtStatsUpdate = () => {},
+  msvtStats = null,
   focusFeature = null,
   clickedCoord = null,
   onMapClick = () => {},
@@ -149,21 +150,9 @@ const MapViewer = ({
 
   // Theo dõi mức zoom hiện tại để cập nhật Chú giải thích ứng
   const [currentZoom, setCurrentZoom] = useState(defaultZoomLevel);
-  const [stats, setStats] = useState({ pointCount: 17, polyCount: 25 });
 
   const handleStatsUpdate = useCallback((newStats) => {
-    if (newStats) {
-      setStats((prev) => {
-        if (prev.pointCount === newStats.pointCount && prev.polyCount === newStats.polyCount) {
-          return prev;
-        }
-        return {
-          pointCount: newStats.pointCount || 17,
-          polyCount: newStats.polyCount || 25
-        };
-      });
-    }
-    if (onMsvtStatsUpdate) {
+    if (onMsvtStatsUpdate && newStats) {
       onMsvtStatsUpdate(newStats);
     }
   }, [onMsvtStatsUpdate]);
@@ -271,7 +260,7 @@ const MapViewer = ({
       </div>
 
       {/* Chú giải Bản đồ Tối giản (Collapsible Minimalist Legend) */}
-      <MsvtLegend stats={stats} />
+      <MsvtLegend stats={msvtStats} />
     </div>
   );
 };

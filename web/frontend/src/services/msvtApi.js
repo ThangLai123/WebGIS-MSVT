@@ -77,8 +77,8 @@ async function parseErrorResponse(response, defaultMsg) {
 
 export const msvtApi = {
   /**
-   * Lấy FeatureCollection GeoJSON của tất cả các vùng trồng có hình học hợp lệ (42 features).
-   * Không chứa 9 bản ghi thiếu hình học và không chứa thông tin nhạy cảm (SĐT, Email).
+   * Lấy FeatureCollection GeoJSON của tất cả các vùng trồng có hình học hợp lệ (Point / Polygon / MultiPolygon).
+   * Tự động loại trừ các bản ghi thiếu hình học và không chứa thông tin nhạy cảm (SĐT, Email).
    */
   async getGeoJSON() {
     try {

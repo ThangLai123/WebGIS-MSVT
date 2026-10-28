@@ -492,6 +492,67 @@
   flex-shrink: 0;
 }
 
+/* Bảng phân rã số liệu chi tiết trong chú giải */
+.map-legend-breakdown {
+  margin-top: 2px;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 6px;
+}
+
+.map-legend-breakdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.map-legend-breakdown-toggle:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.map-legend-breakdown-content {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #f8fafc;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #f1f5f9;
+  font-size: 11px;
+}
+
+.map-legend-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #475569;
+}
+
+.map-legend-stat-row.sub {
+  padding-left: 8px;
+  color: #64748b;
+  font-size: 10.5px;
+}
+
+.map-legend-stat-row.highlight {
+  margin-top: 2px;
+  padding-top: 3px;
+  border-top: 1px dashed #cbd5e1;
+  color: #166534;
+  font-weight: 600;
+}
+
 .map-legend-note {
   font-size: 11px;
   color: #64748b;

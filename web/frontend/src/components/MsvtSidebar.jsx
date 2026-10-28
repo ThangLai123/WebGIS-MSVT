@@ -15,13 +15,22 @@ const MsvtSidebar = ({
   onFilterChange = () => {},
   onResetFilters = () => {},
   clickedCoord = null,
-  stats = { total: 42, pointCount: 17, polyCount: 25 },
+  stats = null,
   onClose = () => {},
   activeTab = 'detail',
   setActiveTab = () => {}
 }) => {
   // Trạng thái sao chép tọa độ
   const [copiedCoord, setCopiedCoord] = useState(false);
+
+  // Số liệu thống kê động
+  const withGeom = stats?.withGeometry ?? ((stats?.pointCount || 0) + (stats?.polyCount || 0));
+  const isFiltered = Boolean(stats?.isFiltered);
+  const filterTabCount = stats?.loading
+    ? '...'
+    : isFiltered
+      ? `${stats.filteredTotal}/${withGeom}`
+      : (withGeom || stats?.total || 0);
 
   const handleCopyCoord = (coordText) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -123,7 +132,7 @@ const MsvtSidebar = ({
           className={`msvt-tab-btn ${activeTab === 'filter' ? 'active' : ''}`}
           onClick={() => setActiveTab('filter')}
         >
-          <span>🔎</span> Bộ lọc ({stats.total || 42})
+          <span>🔎</span> Bộ lọc ({filterTabCount})
         </button>
       </div>
 
@@ -531,7 +540,7 @@ const MsvtSidebar = ({
         {activeTab === 'filter' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ fontSize: '12px', color: '#4b5563', lineHeight: 1.4 }}>
-              Lọc hiển thị {stats.total || 42} vùng trồng trên bản đồ theo các tiêu chí ({stats.pointCount || 17} điểm Point & {stats.polyCount || 25} vùng Polygon).
+              Lọc hiển thị {withGeom || stats?.total || 0} vùng trồng trên bản đồ theo các tiêu chí ({stats?.pointCount ?? 0} điểm Point & {stats?.polyCount ?? 0} vùng Polygon).
             </div>
 
             <div className="msvt-form-group">
@@ -591,9 +600,16 @@ const MsvtSidebar = ({
                 📊 Cơ cấu hình học đối tượng MSVT:
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <li>• Tổng số đối tượng có hình học: <strong>{stats.total || 42}</strong></li>
-                <li>• Vùng ranh giới Polygon / MultiPolygon: <strong>{stats.polyCount || 25}</strong></li>
-                <li>• Điểm mốc tọa độ Point: <strong>{stats.pointCount || 17}</strong></li>
+                <li>• Tổng số đối tượng có hình học: <strong>{withGeom || stats?.total || 0}</strong></li>
+                <li>• Vùng ranh giới Polygon / MultiPolygon: <strong>{stats?.polyCount ?? 0}</strong></li>
+                <li>• Điểm mốc tọa độ Point: <strong>{stats?.pointCount ?? 0}</strong></li>
+                <li>• Tổng bản ghi lưu trữ CSDL: <strong>{stats?.totalRegions || ((withGeom || 0) + (stats?.withoutGeometry || 0))}</strong></li>
+                <li>• Bản ghi chưa có tọa độ: <strong>{stats?.withoutGeometry ?? 0}</strong></li>
+                {isFiltered && (
+                  <li style={{ color: '#166534', fontWeight: 600, borderTop: '1px dashed #cbd5e1', paddingTop: '4px', marginTop: '2px' }}>
+                    • Đang hiển thị theo bộ lọc: <strong>{stats?.filteredTotal}</strong> vùng
+                  </li>
+                )}
                 <li style={{ color: '#6b7280', fontSize: '11px', marginTop: '2px' }}>
                   (Các bản ghi chưa có tọa độ được lưu trữ an toàn trong CSDL, không hiển thị vị trí giả)
                 </li>

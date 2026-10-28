@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import MapViewer from './components/MapViewer';
 import Navbar from './components/Navbar';
 import MsvtSidebar from './components/MsvtSidebar';
@@ -20,7 +20,19 @@ function App() {
   const [selectedMsvtRegion, setSelectedMsvtRegion] = useState(null);
   const [focusFeature, setFocusFeature] = useState(null);
   const [msvtFilters, setMsvtFilters] = useState({ msvt: '', loaiCay: '', thiTruong: '' });
-  const [msvtStats, setMsvtStats] = useState({ total: 42, pointCount: 17, polyCount: 25 });
+  const [msvtStats, setMsvtStats] = useState({
+    totalRegions: null,
+    withGeometry: null,
+    pointCount: null,
+    polyCount: null,
+    withoutGeometry: null,
+    filteredTotal: null,
+    filteredPointCount: null,
+    filteredPolyCount: null,
+    isFiltered: false,
+    total: null,
+    loading: true
+  });
   const [clickedCoord, setClickedCoord] = useState(null);
   const [msvtActiveTab, setMsvtActiveTab] = useState('detail'); // 'detail' | 'lookup' | 'filter'
   const [resetViewTrigger, setResetViewTrigger] = useState(0);
@@ -33,6 +45,67 @@ function App() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showAdminDashboard, setShowAdminDashboard] = useState(false);
   const [msvtRefreshTrigger, setMsvtRefreshTrigger] = useState(0);
+
+  // Tải thống kê tổng hợp từ FastAPI /api/statistics (Category A & C)
+  const fetchSystemStats = useCallback(() => {
+    msvtApi.getStatistics()
+      .then((stats) => {
+        if (!stats) return;
+        const totalRegions = Number(stats.total_regions || 0);
+        const pointCount = Number(stats.geometry_stats?.point_count || 0);
+        const polyCount = Number(stats.geometry_stats?.multipolygon_count || 0);
+        const withGeometry = pointCount + polyCount;
+        const withoutGeometry = stats.geometry_stats?.without_geometry_count != null
+          ? Number(stats.geometry_stats.without_geometry_count)
+          : Math.max(0, totalRegions - withGeometry);
+
+        setMsvtStats((prev) => {
+          const currentWithGeom = prev.withGeometry ?? withGeometry;
+          const isFiltered = Boolean(prev.isFiltered);
+          const currentFilteredTotal = isFiltered ? prev.filteredTotal : currentWithGeom;
+
+          return {
+            ...prev,
+            totalRegions,
+            withoutGeometry,
+            withGeometry: currentWithGeom,
+            pointCount: prev.pointCount ?? pointCount,
+            polyCount: prev.polyCount ?? polyCount,
+            filteredTotal: currentFilteredTotal,
+            total: isFiltered ? currentFilteredTotal : currentWithGeom,
+            loading: false
+          };
+        });
+      })
+      .catch((err) => {
+        console.warn('[App] Lỗi khi tải thống kê tổng hợp hệ thống:', err);
+      });
+  }, []);
+
+  // Tải thống kê hệ thống khi khởi chạy
+  useEffect(() => {
+    fetchSystemStats();
+  }, [fetchSystemStats]);
+
+  // Nhận thông tin thống kê không gian từ MsvtLayer
+  const handleMsvtStatsUpdate = useCallback((layerStats) => {
+    if (!layerStats) return;
+    setMsvtStats((prev) => {
+      const withGeometry = layerStats.withGeometry;
+      const totalRegions = prev.totalRegions ?? (withGeometry + (prev.withoutGeometry || 0));
+      const isFiltered = Boolean(layerStats.isFiltered);
+      const filteredTotal = layerStats.filteredTotal;
+
+      return {
+        ...prev,
+        ...layerStats,
+        totalRegions,
+        withGeometry,
+        total: isFiltered ? filteredTotal : withGeometry,
+        loading: false
+      };
+    });
+  }, []);
 
   // Tự động kiểm tra phiên làm việc qua Cookie HttpOnly khi mở ứng dụng
   useEffect(() => {
@@ -62,15 +135,7 @@ function App() {
   // Làm mới bản đồ và thống kê khi có thay đổi từ trang quản trị
   const handleMsvtDataModified = () => {
     setMsvtRefreshTrigger(prev => prev + 1);
-    msvtApi.getStatistics().then(stats => {
-      if (stats) {
-        setMsvtStats({
-          total: stats.total_regions,
-          pointCount: stats.geometry_stats?.point_count || 0,
-          polyCount: stats.geometry_stats?.multipolygon_count || 0
-        });
-      }
-    }).catch(() => {});
+    fetchSystemStats();
   };
 
   // Chọn vùng trồng từ bản đồ hoặc bảng: mở chi tiết trong Sidebar
@@ -171,7 +236,8 @@ function App() {
             selectedMsvtRegion={selectedMsvtRegion}
             onSelectMsvtRegion={handleSelectMsvtRegion}
             msvtFilters={msvtFilters}
-            onMsvtStatsUpdate={setMsvtStats}
+            onMsvtStatsUpdate={handleMsvtStatsUpdate}
+            msvtStats={msvtStats}
             focusFeature={focusFeature}
             clickedCoord={clickedCoord}
             onMapClick={setClickedCoord}

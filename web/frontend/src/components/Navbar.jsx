@@ -14,7 +14,7 @@ const Navbar = ({
   setShowMsvtLayer = () => {},
   showMsvtPanel = false,
   setShowMsvtPanel = () => {},
-  msvtStats = { total: 42 },
+  msvtStats = null,
   onOpenStats = () => {},
 
   // Phân quyền & Quản trị
@@ -25,6 +25,19 @@ const Navbar = ({
 }) => {
   const isAdmin = currentUser && currentUser.role === 'admin';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Số lượng vùng có hình học thực tế (Category B)
+  const withGeom = msvtStats?.withGeometry ?? ((msvtStats?.pointCount || 0) + (msvtStats?.polyCount || 0));
+  const isFiltered = Boolean(msvtStats?.isFiltered);
+  const badgeText = msvtStats?.loading 
+    ? '...'
+    : isFiltered 
+      ? `${msvtStats.filteredTotal} / ${withGeom}`
+      : (withGeom || msvtStats?.total || 0);
+
+  const msvtButtonTitle = isFiltered
+    ? `Đang hiển thị theo bộ lọc: ${msvtStats?.filteredTotal} trên tổng số ${withGeom} vùng có hình học`
+    : `Hiển thị ${withGeom || 0} vùng trồng có hình học trên bản đồ (Tổng CSDL: ${msvtStats?.totalRegions || withGeom || 0})`;
 
   // Đóng mobile menu khi nhấn phím Escape
   useEffect(() => {
@@ -91,12 +104,12 @@ const Navbar = ({
           type="button"
           className={`navbar-nav-btn navbar-nav-btn-msvt ${!showMsvtLayer ? 'inactive' : ''}`}
           onClick={() => setShowMsvtLayer(prev => !prev)}
-          title="Bật hoặc tắt hiển thị lớp đối tượng không gian MSVT trên bản đồ"
+          title={msvtButtonTitle}
         >
           <span>🌿</span>
           <span>{showMsvtLayer ? 'Vùng trồng MSVT' : 'Tắt MSVT'}</span>
           <span className="navbar-badge-count">
-            {msvtStats?.total || 42}
+            {badgeText}
           </span>
         </button>
 
@@ -264,7 +277,9 @@ const Navbar = ({
                   {showMsvtLayer ? 'Lớp Vùng trồng MSVT' : 'Lớp Vùng trồng (Đang tắt)'}
                 </span>
                 <span className="navbar-mobile-badge">
-                  {msvtStats?.total || 42} vùng
+                  {msvtStats?.loading 
+                    ? '...' 
+                    : (isFiltered ? `${msvtStats.filteredTotal}/${withGeom} vùng` : `${withGeom || msvtStats?.total || 0} vùng`)}
                 </span>
               </button>
 
